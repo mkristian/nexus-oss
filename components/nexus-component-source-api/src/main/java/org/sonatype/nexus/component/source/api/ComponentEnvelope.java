@@ -12,20 +12,20 @@
  */
 package org.sonatype.nexus.component.source.api;
 
+import org.sonatype.nexus.component.model.Asset;
+
 /**
- * A remote source for components.
+ * A transmitted component and handles for any assets.
  *
  * @since 3.0
  */
-public interface ComponentSource
+public interface ComponentEnvelope<T>
 {
-  /**
-   * A cluster-wide unique name for this source.
-   */
-  String getName();
+  T getComponent();
 
   /**
-   * Returns {@code true} if the remote source is accessible right now.
+   * The {@link Asset}s returned are handles for remote resources: they should not be persisted directly, but
+   * instead have their {@link Asset#openStream() streams} read. {@link Asset#getComponentId} will be {@code null}.
    */
-  boolean isAvailable();
+  Iterable<Asset> getAssets();
 }

@@ -12,20 +12,18 @@
  */
 package org.sonatype.nexus.component.source.api;
 
+import javax.annotation.Nullable;
+
 /**
- * A remote source for components.
+ * A registry of the currently available component sources.
  *
  * @since 3.0
  */
-public interface ComponentSource
+public interface ComponentSourceRegistry
 {
   /**
-   * A cluster-wide unique name for this source.
+   * Return a {@link ComponentSource} for the given name, or {@code null} if none is registered.
    */
-  String getName();
-
-  /**
-   * Returns {@code true} if the remote source is accessible right now.
-   */
-  boolean isAvailable();
+  @Nullable
+  public <T extends ComponentSource> T getSource(String name);
 }

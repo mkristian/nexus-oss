@@ -13,19 +13,16 @@
 package org.sonatype.nexus.component.source.api;
 
 /**
- * A remote source for components.
+ * A callback interface to handle the arrival of components from a push source.
  *
  * @since 3.0
  */
-public interface ComponentSource
+public interface ComponentReceiver
 {
   /**
-   * A cluster-wide unique name for this source.
+   * Receive components (possibly storing them).
+   *
+   * @param source The {@link PushComponentSource} that pushed the components to us.
    */
-  String getName();
-
-  /**
-   * Returns {@code true} if the remote source is accessible right now.
-   */
-  boolean isAvailable();
+  void receive(Iterable<ComponentEnvelope> components, ComponentSource source);
 }

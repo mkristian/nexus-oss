@@ -13,19 +13,22 @@
 package org.sonatype.nexus.component.source.api;
 
 /**
- * A remote source for components.
- *
  * @since 3.0
  */
-public interface ComponentSource
+public abstract class ComponentSourceGroup
+    implements PullComponentSource
 {
-  /**
-   * A cluster-wide unique name for this source.
-   */
-  String getName();
+  private final String name;
 
-  /**
-   * Returns {@code true} if the remote source is accessible right now.
-   */
-  boolean isAvailable();
+  private final Iterable<PullComponentSource> sources;
+
+  public ComponentSourceGroup(final String name, final Iterable<PullComponentSource> sources) {
+    this.name = name;
+    this.sources = sources;
+  }
+
+  @Override
+  public String getName() {
+    return name;
+  }
 }
