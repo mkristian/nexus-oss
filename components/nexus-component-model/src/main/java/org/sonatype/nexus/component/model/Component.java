@@ -10,25 +10,18 @@
  * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
-package org.sonatype.nexus.component.services;
+package org.sonatype.nexus.component.model;
 
-import java.util.List;
-
-import org.sonatype.nexus.component.model.Asset;
-import org.sonatype.nexus.component.model.Component;
+import javax.annotation.Nullable;
 
 /**
- * Search interface for finding components and assets.
- *
- * Note that the returned lists consist of POJOs that represent a snapshot of the state
- * of the underlying records at the time of the query. They are thus divorced from
- * the underlying session scope.
+ * A domain object representing a component.
  */
-public interface ComponentFinder
+public interface Component
 {
-  <T extends Component> List<T> findComponents(Class<T> componentClass, ComponentQuery componentQuery);
-
-  <T extends Component> List<T> findComponentsWithAssets(Class<T> componentClass, AssetQuery assetQuery);
-
-  List<Asset> findAssets(AssetQuery assetQuery);
+  /**
+   * Gets the canonical id, or {@code null} if it hasn't been stored yet.
+   */
+  @Nullable
+  ComponentId getId();
 }
