@@ -121,7 +121,8 @@ public class GenerateMetadataTaskSettingsTest
         mock(RepositoryURLBuilder.class),
         mock(RpmScanner.class),
         mock(Manager.class),
-        mock(CommandLineExecutor.class)
+        mock(CommandLineExecutor.class),
+        true
     );
     task.setRpmDir(rpmsDir().getAbsolutePath());
     task.setRpmUrl(RPM_URL);
@@ -144,7 +145,8 @@ public class GenerateMetadataTaskSettingsTest
         repositoryURLBuilder(),
         mock(RpmScanner.class),
         mock(Manager.class),
-        mock(CommandLineExecutor.class)
+        mock(CommandLineExecutor.class),
+        true
     );
     task.setRepositoryId(REPO);
     // when
@@ -167,7 +169,8 @@ public class GenerateMetadataTaskSettingsTest
         mock(RepositoryURLBuilder.class),
         mock(RpmScanner.class),
         mock(Manager.class),
-        mock(CommandLineExecutor.class)
+        mock(CommandLineExecutor.class),
+        true
     );
     task.setRepositoryId(REPO);
 
@@ -197,7 +200,8 @@ public class GenerateMetadataTaskSettingsTest
         mock(RepositoryURLBuilder.class),
         mock(RpmScanner.class),
         mock(Manager.class),
-        mock(CommandLineExecutor.class)
+        mock(CommandLineExecutor.class),
+        true
     );
     task.setRepositoryId(REPO);
 
@@ -249,7 +253,8 @@ public class GenerateMetadataTaskSettingsTest
         mock(RepositoryURLBuilder.class),
         mock(RpmScanner.class),
         mock(Manager.class),
-        mock(CommandLineExecutor.class)
+        mock(CommandLineExecutor.class),
+        true
     )
     {
 

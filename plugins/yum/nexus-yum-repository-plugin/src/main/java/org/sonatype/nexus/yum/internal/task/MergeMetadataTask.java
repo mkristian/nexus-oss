@@ -69,12 +69,16 @@ public class MergeMetadataTask
 
   private final CommandLineExecutor commandLineExecutor;
 
+  private final boolean useNoDatabaseSwitch;
+
   @Inject
   public MergeMetadataTask(final EventBus eventBus,
-                           final CommandLineExecutor commandLineExecutor)
+                           final CommandLineExecutor commandLineExecutor,
+                           final @Named("${nexus.yum.useNoDatabaseSwitch:-true}") boolean useNoDatabaseSwitch)
   {
     super(eventBus, null);
     this.commandLineExecutor = checkNotNull(commandLineExecutor);
+    this.useNoDatabaseSwitch = useNoDatabaseSwitch;
   }
 
   public void setGroupRepository(final GroupRepository groupRepository) {
@@ -224,7 +228,13 @@ public class MergeMetadataTask
       repos.append(" --repo=");
       repos.append(memberRepoBaseDir.toURI().toString());
     }
-    return format("mergerepo -d %s -o %s", repos.toString(), repoBaseDir.getAbsolutePath());
+    final String tail = format(" %s -o %s", repos.toString(), repoBaseDir.getAbsolutePath());
+    if (useNoDatabaseSwitch) {
+      return "mergerepo --no-database" + tail;
+    }
+    else {
+      return "mergerepo" + tail;
+    }
   }
 
   public static ScheduledTask<YumRepository> createTaskFor(final NexusScheduler nexusScheduler,

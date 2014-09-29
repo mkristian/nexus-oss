@@ -116,6 +116,8 @@ public class GenerateMetadataTask
 
   private final CommandLineExecutor commandLineExecutor;
 
+  private final boolean useNoDatabaseSwitch;
+
   @Inject
   public GenerateMetadataTask(final EventBus eventBus,
                               final RepositoryRegistry repositoryRegistry,
@@ -123,7 +125,8 @@ public class GenerateMetadataTask
                               final RepositoryURLBuilder repositoryURLBuilder,
                               final RpmScanner scanner,
                               final Manager routingManager,
-                              final CommandLineExecutor commandLineExecutor)
+                              final CommandLineExecutor commandLineExecutor,
+                              final @Named("${nexus.yum.useNoDatabaseSwitch:-true}") boolean useNoDatabaseSwitch)
   {
     super(eventBus, null);
 
@@ -133,6 +136,7 @@ public class GenerateMetadataTask
     this.repositoryURLBuilder = checkNotNull(repositoryURLBuilder);
     this.routingManager = checkNotNull(routingManager);
     this.commandLineExecutor = checkNotNull(commandLineExecutor);
+    this.useNoDatabaseSwitch = useNoDatabaseSwitch;
 
     getParameters().put(PARAM_SINGLE_RPM_PER_DIR, Boolean.toString(true));
   }
@@ -341,7 +345,10 @@ public class GenerateMetadataTask
   }
 
   private String buildCreateRepositoryCommand(File packageList) {
-    StringBuilder commandLine = new StringBuilder("createrepo --update --verbose --database");
+    StringBuilder commandLine = new StringBuilder("createrepo --update --verbose");
+    if (useNoDatabaseSwitch) {
+      commandLine.append(" --no-database");
+    }
     commandLine.append(" --outputdir ").append(getRepoDir().getAbsolutePath());
     commandLine.append(" --pkglist ").append(packageList.getAbsolutePath());
     commandLine.append(" --cachedir ").append(createCacheDir().getAbsolutePath());
