@@ -331,6 +331,9 @@ public class RaptureWebResourceBundle
     styles.add(uri(mode("resources/loading-{mode}.css")));
     styles.add(uri(mode("resources/baseapp-{mode}.css")));
 
+    // HACK: testing...
+    styles.add(uri("resources/fonts/proxima-nova/stylesheet.css"));
+
     // add all plugin styles
     for (UiPluginDescriptor descriptor : pluginDescriptors) {
       String path = String.format("resources/%s-{mode}.css", descriptor.getPluginId());
