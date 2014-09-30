@@ -164,6 +164,10 @@ public class GenerateMetadataTask
 
       LOG.debug("Generating Yum-Repository for '{}' ...", getRpmDir());
       try {
+        // NEXUS-6680: Nuke cache dir if force rebuild in effect
+        if (shouldForceFullScan()) {
+          DirSupport.deleteIfExists(getCacheDir().toPath());
+        }
         DirSupport.mkdir(getRepoDir().toPath());
 
         File rpmListFile = createRpmListFile();
@@ -387,9 +391,7 @@ public class GenerateMetadataTask
   }
 
   private File getCacheDir(final String name) {
-    final File cacheDir = new File(
-        new File(yumRegistry.getTemporaryDirectory(), CACHE_DIR_PREFIX + getRepositoryId()), name
-    );
+    final File cacheDir = new File(getCacheDir(), name);
     try {
       DirSupport.mkdir(cacheDir.toPath());
     }
@@ -397,6 +399,10 @@ public class GenerateMetadataTask
       Throwables.propagate(e);
     }
     return cacheDir;
+  }
+
+  private File getCacheDir() {
+    return new File(yumRegistry.getTemporaryDirectory(), CACHE_DIR_PREFIX + getRepositoryId());
   }
 
   @Override
