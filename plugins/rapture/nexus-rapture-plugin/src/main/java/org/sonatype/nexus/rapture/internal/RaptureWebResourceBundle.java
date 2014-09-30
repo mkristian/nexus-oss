@@ -331,13 +331,12 @@ public class RaptureWebResourceBundle
     styles.add(uri(mode("resources/loading-{mode}.css")));
     styles.add(uri(mode("resources/baseapp-{mode}.css")));
 
-    // HACK: testing...
-    styles.add(uri("resources/fonts/proxima-nova/stylesheet.css"));
-
     // add all plugin styles
     for (UiPluginDescriptor descriptor : pluginDescriptors) {
-      String path = String.format("resources/%s-{mode}.css", descriptor.getPluginId());
-      styles.add(uri(mode(path)));
+      if (descriptor.hasStyle()) {
+        String path = String.format("resources/%s-{mode}.css", descriptor.getPluginId());
+        styles.add(uri(mode(path)));
+      }
     }
 
     return styles;
@@ -356,8 +355,10 @@ public class RaptureWebResourceBundle
     // add all "prod" plugin scripts if debug is not enabled
     if (!isDebug()) {
       for (UiPluginDescriptor descriptor : pluginDescriptors) {
-        String path = String.format("%s-prod.js", descriptor.getPluginId());
-        scripts.add(uri(path));
+        if (descriptor.hasScript()) {
+          String path = String.format("%s-prod.js", descriptor.getPluginId());
+          scripts.add(uri(path));
+        }
       }
     }
 
