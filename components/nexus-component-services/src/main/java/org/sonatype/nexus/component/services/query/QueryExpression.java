@@ -10,26 +10,31 @@
  * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
-package org.sonatype.nexus.component.services;
+package org.sonatype.nexus.component.services.query;
 
-import java.util.List;
-
-import org.sonatype.nexus.component.model.Asset;
-import org.sonatype.nexus.component.model.Component;
-import org.sonatype.nexus.component.services.query.MetadataQuery;
-
-/**
- * Search interface for finding components and assets.
- *
- * Note that the returned lists consist of POJOs that represent a snapshot of the state
- * of the underlying records at the time of the query. They are thus divorced from
- * the underlying session scope.
- *
- * @since 3.0
- */
-public interface ComponentFinder
+public abstract class QueryExpression
 {
-  <T extends Component> List<T> findComponents(Class<T> componentClass, MetadataQuery metadataQuery);
+  public static BooleanExpression assetFieldEquals(String name, Object value) {
+    return null;
+  }
 
-  List<Asset> findAssets(MetadataQuery metadataQuery);
+  public static BooleanExpression assetFieldLike(String name, String pattern) {
+    return null;
+  }
+
+  public static BooleanExpression componentFieldEquals(String name, Object value) {
+    return null;
+  }
+
+  public static BooleanExpression componentFieldLike(String name, String pattern) {
+    return null;
+  }
+
+  public static CompoundExpression and(QueryExpression... operands) {
+    return null;
+  }
+
+  public static CompoundExpression or(QueryExpression... operands) {
+    return null;
+  }
 }

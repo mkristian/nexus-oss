@@ -10,26 +10,39 @@
  * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
-package org.sonatype.nexus.component.services;
+package org.sonatype.nexus.component.services.query;
 
-import java.util.List;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.sonatype.nexus.component.model.Asset;
-import org.sonatype.nexus.component.model.Component;
-import org.sonatype.nexus.component.services.query.MetadataQuery;
-
-/**
- * Search interface for finding components and assets.
- *
- * Note that the returned lists consist of POJOs that represent a snapshot of the state
- * of the underlying records at the time of the query. They are thus divorced from
- * the underlying session scope.
- *
- * @since 3.0
- */
-public interface ComponentFinder
+public class BooleanExpression
+    extends QueryExpression
 {
-  <T extends Component> List<T> findComponents(Class<T> componentClass, MetadataQuery metadataQuery);
+  public enum Operator {
+    EQ,
+    LIKE
+  }
 
-  List<Asset> findAssets(MetadataQuery metadataQuery);
+  private final Operator operator;
+
+  private final String name;
+
+  private final String value;
+
+  BooleanExpression(Operator operator, String name, String value) {
+    this.operator = checkNotNull(operator);
+    this.name = checkNotNull(name);
+    this.value = checkNotNull(value);
+  }
+
+  public Operator getOperator() {
+    return operator;
+  }
+
+  public String getName() {
+    return name;
+  }
+
+  public String getValue() {
+    return value;
+  }
 }

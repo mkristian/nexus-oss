@@ -10,26 +10,22 @@
  * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
-package org.sonatype.nexus.component.services;
+package org.sonatype.nexus.component.services.query;
 
-import java.util.List;
+import org.sonatype.nexus.component.model.ComponentId;
 
-import org.sonatype.nexus.component.model.Asset;
-import org.sonatype.nexus.component.model.Component;
-import org.sonatype.nexus.component.services.query.MetadataQuery;
-
-/**
- * Search interface for finding components and assets.
- *
- * Note that the returned lists consist of POJOs that represent a snapshot of the state
- * of the underlying records at the time of the query. They are thus divorced from
- * the underlying session scope.
- *
- * @since 3.0
- */
-public interface ComponentFinder
+// TODO: Constructor and builder-like methods, similar to RecordQuery
+public class MetadataQuery
 {
-  <T extends Component> List<T> findComponents(Class<T> componentClass, MetadataQuery metadataQuery);
+  private Integer limit;
 
-  List<Asset> findAssets(MetadataQuery metadataQuery);
+  private Integer skip;
+
+  private ComponentId skipComponent;
+
+  private String orderBy;
+
+  private boolean descending;
+
+  private QueryExpression queryExpression;
 }
