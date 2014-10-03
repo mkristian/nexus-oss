@@ -20,6 +20,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.zip.GZIPInputStream;
@@ -340,8 +341,7 @@ public class HostedGETLayoutTest
     assertThat(path, file.type(), equalTo(FileType.DIRECTORY));
     assertThat(path, file.get(), nullValue());
     assertThat(path, file.hasException(), is(false));
-    assertThat(path, cleanupList(((Directory) file).getItems()),
-        equalTo(cleanupList(items)));
+    assertThat(path, cleanupList(((Directory) file).getItems()), equalTo(cleanupList(items)));
   }
 
   protected List<String> cleanupList(String... items) {
@@ -351,6 +351,8 @@ public class HostedGETLayoutTest
         list.add(item);
       }
     }
+    // normalize to cope with file-system listing order issues.
+    Collections.sort(list);
     return list;
   }
 
