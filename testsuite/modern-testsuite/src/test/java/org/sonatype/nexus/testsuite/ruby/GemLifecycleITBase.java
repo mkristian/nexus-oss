@@ -10,7 +10,7 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the Apache License Version 2.0 for the specific language governing permissions and limitations there under.
  */
-package org.sonatype.nexus.plugins.ruby;
+package org.sonatype.nexus.testsuite.ruby;
 
 import java.io.File;
 
@@ -23,8 +23,8 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.endsWith;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.sonatype.nexus.ruby.TestUtils.lastLine;
-import static org.sonatype.nexus.ruby.TestUtils.numberOfLines;
+import static org.sonatype.nexus.testsuite.ruby.TestUtils.lastLine;
+import static org.sonatype.nexus.testsuite.ruby.TestUtils.numberOfLines;
 
 @NexusStartAndStopStrategy(NexusStartAndStopStrategy.Strategy.EACH_TEST)
 // running 3 or more tests in one go produces Errno::EBADF: Bad file descriptor - Bad file descriptor

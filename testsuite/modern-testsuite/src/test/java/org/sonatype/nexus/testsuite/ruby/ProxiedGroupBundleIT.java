@@ -10,16 +10,12 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the Apache License Version 2.0 for the specific language governing permissions and limitations there under.
  */
-package org.sonatype.nexus.plugins.ruby;
+package org.sonatype.nexus.testsuite.ruby;
 
-public class ProxiedGroupGemLifecycleIT
-    extends GemLifecycleITBase
+public class ProxiedGroupBundleIT
+    extends BundleITBase
 {
-  public ProxiedGroupGemLifecycleIT() {
+  public ProxiedGroupBundleIT() {
     super("gemsproxygroup");
-  }
-
-  void moreAsserts(String gemName, String gemspecName, String dependencyName) {
-    // TODO
   }
 }

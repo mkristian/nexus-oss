@@ -10,19 +10,18 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the Apache License Version 2.0 for the specific language governing permissions and limitations there under.
  */
-package org.sonatype.nexus.plugins.ruby;
+package org.sonatype.nexus.testsuite.ruby;
 
-import java.io.IOException;
+import java.io.File;
 
-public class GroupedBundleIT
-    extends BundleITBase
+class ITestJRubyScriptingContainer
+    extends TestScriptingContainer
 {
-  public GroupedBundleIT() {
-    super("gemsgroup");
+  ITestJRubyScriptingContainer(String userHome) {
+    super(userHome, "target/rubygems", null);
   }
 
-  @Override
-  protected void testAfterBundleComplete() throws IOException {
-    assertHostedFiles();
+  ITestJRubyScriptingContainer(String userHome, File gemfile) {
+    super(userHome, "target/rubygems", gemfile.getAbsolutePath());
   }
 }

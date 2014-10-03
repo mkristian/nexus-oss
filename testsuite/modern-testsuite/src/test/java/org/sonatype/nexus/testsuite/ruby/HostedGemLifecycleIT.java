@@ -10,7 +10,7 @@
  * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the Apache License Version 2.0 for the specific language governing permissions and limitations there under.
  */
-package org.sonatype.nexus.plugins.ruby;
+package org.sonatype.nexus.testsuite.ruby;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -21,7 +21,7 @@ import org.junit.Test;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
-import static org.sonatype.nexus.ruby.TestUtils.lastLine;
+import static org.sonatype.nexus.testsuite.ruby.TestUtils.lastLine;
 
 public class HostedGemLifecycleIT
     extends GemLifecycleITBase
