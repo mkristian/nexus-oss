@@ -27,4 +27,9 @@
   <name>${project.groupId}:${project.artifactId}</name>
   <packaging>pom</packaging>
 
+  <modules>
+    <module>nexus-ruby-tools</module>
+    <module>nexus-ruby-plugin</module>
+  </modules>
+
 </project>
