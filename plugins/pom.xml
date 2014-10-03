@@ -517,6 +517,22 @@
         <version>2.11.0-SNAPSHOT</version>
       </dependency>
 
+      <!-- rubygems -->
+
+      <dependency>
+        <groupId>org.sonatype.nexus.plugins</groupId>
+        <artifactId>nexus-ruby-tools</artifactId>
+        <type>jar</type>
+        <version>2.11.0-SNAPSHOT</version>
+      </dependency>
+
+      <dependency>
+        <groupId>org.sonatype.nexus.plugins</groupId>
+        <artifactId>nexus-ruby-plugin</artifactId>
+        <type>nexus-plugin</type>
+        <version>2.11.0-SNAPSHOT</version>
+      </dependency>
+
       <!-- rrb -->
 
       <dependency>
