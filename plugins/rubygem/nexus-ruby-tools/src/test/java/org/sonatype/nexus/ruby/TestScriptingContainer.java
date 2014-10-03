@@ -18,7 +18,7 @@ import java.util.Map;
 
 import org.jruby.embed.ScriptingContainer;
 
-public class TestScriptingContainer
+class TestScriptingContainer
     extends ScriptingContainer
 {
   public TestScriptingContainer() {
