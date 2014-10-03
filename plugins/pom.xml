@@ -53,6 +53,7 @@
     <module>osgi</module>
     <module>p2</module>
     <module>restlet1x</module>
+    <module>rubygem</module>
     <module>security</module>
     <module>yum</module>
   </modules>
