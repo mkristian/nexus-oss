@@ -37,9 +37,14 @@ import static org.hamcrest.Matchers.containsString;
 import static org.sonatype.sisu.filetasks.builder.FileRef.file;
 import static org.sonatype.sisu.filetasks.builder.FileRef.path;
 
-public abstract class RubyNexusRunningITSupport
+public abstract class RubyITSupport
     extends NexusRunningITSupport
 {
+  // FIXME: This configuration is only used presently by DownloadsOnEmptyRepositoriesIT
+  // FIXME: Looks like it was used for some others, but was commented out to use a sub-class to control config
+  // FIXME: Should consider normalizing like *all* other modern tests to use same params to control bundle here
+  // FIXME: ... and then remove use of injected-test.properties which is presently only used for these ruby tests
+
   @Parameters
   public static Collection<String[]> data() {
     String[][] data = new String[][]{
@@ -63,12 +68,12 @@ public abstract class RubyNexusRunningITSupport
 
   private BundleRunner bundleRunner;
 
-  public RubyNexusRunningITSupport(String nexusBundleCoordinates, String repoId) {
+  public RubyITSupport(String nexusBundleCoordinates, String repoId) {
     super(nexusBundleCoordinates);
     this.repoId = repoId;
   }
 
-  public RubyNexusRunningITSupport(String repoId) {
+  public RubyITSupport(String repoId) {
     this(null, repoId);
   }
 

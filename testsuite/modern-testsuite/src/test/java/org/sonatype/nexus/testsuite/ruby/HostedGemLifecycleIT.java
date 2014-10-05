@@ -24,7 +24,7 @@ import static org.hamcrest.Matchers.is;
 import static org.sonatype.nexus.testsuite.ruby.TestUtils.lastLine;
 
 public class HostedGemLifecycleIT
-    extends GemLifecycleITBase
+    extends GemLifecycleITSupport
 {
   public HostedGemLifecycleIT() {
     super("gemshost");

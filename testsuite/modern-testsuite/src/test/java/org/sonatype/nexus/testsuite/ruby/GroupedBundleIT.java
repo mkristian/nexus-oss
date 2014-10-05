@@ -15,7 +15,7 @@ package org.sonatype.nexus.testsuite.ruby;
 import java.io.IOException;
 
 public class GroupedBundleIT
-    extends BundleITBase
+    extends BundleITSupport
 {
   public GroupedBundleIT() {
     super("gemsgroup");

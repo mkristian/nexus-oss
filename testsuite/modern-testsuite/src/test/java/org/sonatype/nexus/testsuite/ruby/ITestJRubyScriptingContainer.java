@@ -17,6 +17,7 @@ import java.io.File;
 class ITestJRubyScriptingContainer
     extends TestScriptingContainer
 {
+  // FIXME: Should root reference to "target" here using TestUtil
   ITestJRubyScriptingContainer(String userHome) {
     super(userHome, "target/rubygems", null);
   }

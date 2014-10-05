@@ -13,7 +13,7 @@
 package org.sonatype.nexus.testsuite.ruby;
 
 public class GroupedGemLifecycleIT
-    extends GemLifecycleITBase
+    extends GemLifecycleITSupport
 {
   public GroupedGemLifecycleIT() {
     super("gemsgroup");

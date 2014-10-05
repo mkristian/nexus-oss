@@ -26,7 +26,7 @@ import static org.hamcrest.Matchers.is;
 @NexusStartAndStopStrategy(NexusStartAndStopStrategy.Strategy.EACH_TEST)
 @RunWith(value = Parameterized.class)
 public class DownloadsOnEmptyRepositoriesIT
-    extends RubyNexusRunningITSupport
+    extends RubyITSupport
 {
   public DownloadsOnEmptyRepositoriesIT(String repoId) {
     super(repoId);

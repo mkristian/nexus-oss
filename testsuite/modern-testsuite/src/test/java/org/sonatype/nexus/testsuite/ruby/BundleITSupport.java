@@ -34,12 +34,12 @@ import static org.sonatype.sisu.filetasks.builder.FileRef.path;
 //running 3 or more tests in one go produces Errno::EBADF: Bad file descriptor - Bad file descriptor
 //so run each test in its own forked jvm :(
 //@RunWith(value = Parameterized.class)
-public class BundleITBase
-    extends RubyNexusRunningITSupport
+public class BundleITSupport
+    extends RubyITSupport
 {
   private File target;
 
-  public BundleITBase(String repoId) {
+  public BundleITSupport(String repoId) {
     super(repoId);
   }
 

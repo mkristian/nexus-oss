@@ -13,7 +13,7 @@
 package org.sonatype.nexus.testsuite.ruby;
 
 public class ProxiedBundleIT
-    extends BundleITBase
+    extends BundleITSupport
 {
   public ProxiedBundleIT() {
     super("gemsproxy");

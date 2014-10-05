@@ -15,7 +15,7 @@ package org.sonatype.nexus.testsuite.ruby;
 import java.io.IOException;
 
 public class HostedBundleIT
-    extends BundleITBase
+    extends BundleITSupport
 {
   public HostedBundleIT() {
     super("gemshost");

@@ -30,11 +30,11 @@ import static org.sonatype.nexus.testsuite.ruby.TestUtils.numberOfLines;
 // running 3 or more tests in one go produces Errno::EBADF: Bad file descriptor - Bad file descriptor
 // so run each test in its own forked jvm :(
 //@RunWith(value = Parameterized.class)
-public abstract class GemLifecycleITBase
-    extends RubyNexusRunningITSupport
+public abstract class GemLifecycleITSupport
+    extends RubyITSupport
 {
 
-  public GemLifecycleITBase(String repoId) {
+  public GemLifecycleITSupport(String repoId) {
     super(repoId);
   }
 

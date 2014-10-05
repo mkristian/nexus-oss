@@ -13,7 +13,7 @@
 package org.sonatype.nexus.testsuite.ruby;
 
 public class ProxiedGroupGemLifecycleIT
-    extends GemLifecycleITBase
+    extends GemLifecycleITSupport
 {
   public ProxiedGroupGemLifecycleIT() {
     super("gemsproxygroup");
