@@ -142,6 +142,7 @@ public abstract class RubyNexusRunningITSupport
   protected NexusBundleConfiguration configureNexus(final NexusBundleConfiguration configuration) {
     return configuration
         .setLogLevel("org.sonatype.nexus.ruby", "TRACE")
+        .setLogLevel("org.sonatype.nexus.plugins.ruby", "TRACE")
         .addPlugins(
             artifactResolver().resolvePluginFromDependencyManagement(
                 "org.sonatype.nexus.plugins", "nexus-ruby-plugin"
