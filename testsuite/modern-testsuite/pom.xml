@@ -34,6 +34,22 @@
     <testsuite.basedir>${project.basedir}/..</testsuite.basedir>
   </properties>
 
+  <dependencyManagement>
+    <dependencies>
+
+      <!--
+      HACK: ruby tests need this in DM to resolve and download this required gem.
+      -->
+      <dependency>
+        <groupId>rubygems</groupId>
+        <artifactId>nexus</artifactId>
+        <version>1.2.1</version>
+        <type>gem</type>
+      </dependency>
+
+    </dependencies>
+  </dependencyManagement>
+
   <dependencies>
     <dependency>
       <groupId>org.sonatype.nexus</groupId>
