@@ -141,6 +141,7 @@ public abstract class RubyNexusRunningITSupport
   @Override
   protected NexusBundleConfiguration configureNexus(final NexusBundleConfiguration configuration) {
     return configuration
+        .setLogLevel("org.sonatype.nexus.ruby", "TRACE")
         .addPlugins(
             artifactResolver().resolvePluginFromDependencyManagement(
                 "org.sonatype.nexus.plugins", "nexus-ruby-plugin"
@@ -152,7 +153,6 @@ public abstract class RubyNexusRunningITSupport
                 .to().file(path("sonatype-work/nexus/conf/nexus.xml"))
         )
         .setStartTimeout(Time.minutes(3).toSecondsI())
-        .setLogLevel("DEBUG")
         .setPort(4711);
   }
 
