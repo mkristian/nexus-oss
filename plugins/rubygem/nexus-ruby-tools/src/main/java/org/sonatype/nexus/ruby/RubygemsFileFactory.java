@@ -36,7 +36,7 @@ public interface RubygemsFileFactory
   /**
    * create <code>Directory</code> /maven/releases/rubygems/{artifactId} or /maven/prerelease/rubygems/{artifactId}
    *
-   * @param prerelease flag to create released or prereleased gem, i.e. without or with SNAPSHOT in version
+   * @param prereleases flag to create released or prereleased gem, i.e. without or with SNAPSHOT in version
    * @return RubygemsDirectory
    */
   Directory gemArtifactIdDirectory(String path, String artifactId, boolean prereleases);
@@ -123,9 +123,6 @@ public interface RubygemsFileFactory
 
   /**
    * create <code>SpecsIndexFile</code> /specs.4.8 or /latest_specs.4.8 or /prerelease_specs.4.8
-   *
-   * @param SpecsIndexType of the spec to create
-   * @return SpecsIndexFile
    */
   SpecsIndexFile specsIndexFile(SpecsIndexType type);
 
@@ -133,15 +130,11 @@ public interface RubygemsFileFactory
    * create <code>SpecsIndexZippedFile</code> /specs.4.8.gz or /latest_specs.4.8.gz or /prerelease_specs.4.8.gz
    *
    * @param name which is either 'specs' or 'latest_specs' or 'prerelease_specs'
-   * @return SpecsIndexZippedFile
    */
   SpecsIndexZippedFile specsIndexZippedFile(String name);
 
   /**
    * create <code>SpecsIndexZippedFile</code> /specs.4.8 or /latest_specs.4.8 or /prerelease_specs.4.8
-   *
-   * @param SpecsIndexType of the spec to create
-   * @return SpecsIndexZippedFile
    */
   SpecsIndexZippedFile specsIndexZippedFile(SpecsIndexType type);
 
