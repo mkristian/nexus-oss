@@ -68,68 +68,36 @@ public class DefaultRubygemsFileFactory
         SEPARATOR, name, SEPARATOR, v2, SEPARATOR, name + '-' + v1);
   }
 
-  /*
-   * (non-Javadoc)
-   * @see org.sonatype.nexus.ruby.RubygemsFileFactory#sha1(org.sonatype.nexus.ruby.RubygemsFile)
-   */
   @Override
   public Sha1File sha1(RubygemsFile file) {
     return new Sha1File(this, file.storagePath() + ".sha1", file.remotePath() + ".sha1", file);
   }
 
-  /*
-   * (non-Javadoc)
-   * @see org.sonatype.nexus.ruby.RubygemsFileFactory#notFound(java.lang.String)
-   */
   @Override
   public NotFoundFile notFound(String path) {
     return new NotFoundFile(this, path);
   }
 
-  /*
-   * (non-Javadoc)
-   * @see org.sonatype.nexus.ruby.RubygemsFileFactory#pomSnapshot(java.lang.String, java.lang.String, java.lang.String)
-   */
   @Override
   public PomFile pomSnapshot(String name, String version, String timestamp) {
-    return new PomFile(this, toPath(name, version, timestamp, true) + ".pom",
-        name, version, true);
+    return new PomFile(this, toPath(name, version, timestamp, true) + ".pom", name, version, true);
   }
 
-  /*
-   * (non-Javadoc)
-   * @see org.sonatype.nexus.ruby.RubygemsFileFactory#gemArtifactSnapshot(java.lang.String, java.lang.String, java.lang.String)
-   */
   @Override
   public GemArtifactFile gemArtifactSnapshot(String name, String version, String timestamp) {
-    return new GemArtifactFile(this, toPath(name, version, timestamp, true) + ".gem",
-        name, version, true);
+    return new GemArtifactFile(this, toPath(name, version, timestamp, true) + ".gem", name, version, true);
   }
 
-  /*
-   * (non-Javadoc)
-   * @see org.sonatype.nexus.ruby.RubygemsFileFactory#pom(java.lang.String, java.lang.String)
-   */
   @Override
   public PomFile pom(String name, String version) {
-    return new PomFile(this, toPath(name, version, null, false) + ".pom",
-        name, version, false);
+    return new PomFile(this, toPath(name, version, null, false) + ".pom", name, version, false);
   }
 
-  /*
-   * (non-Javadoc)
-   * @see org.sonatype.nexus.ruby.RubygemsFileFactory#gemArtifact(java.lang.String, java.lang.String)
-   */
   @Override
   public GemArtifactFile gemArtifact(String name, String version) {
-    return new GemArtifactFile(this, toPath(name, version, null, false) + ".gem",
-        name, version, false);
+    return new GemArtifactFile(this, toPath(name, version, null, false) + ".gem", name, version, false);
   }
 
-  /*
-   * (non-Javadoc)
-   * @see org.sonatype.nexus.ruby.RubygemsFileFactory#mavenMetadataSnapshot(java.lang.String, java.lang.String)
-   */
   @Override
   public MavenMetadataSnapshotFile mavenMetadataSnapshot(String name, String version) {
     String path = join(MAVEN_PRERELEASED_RUBYGEMS, SEPARATOR, name, SEPARATOR,
@@ -138,10 +106,6 @@ public class DefaultRubygemsFileFactory
     return new MavenMetadataSnapshotFile(this, path, name, version);
   }
 
-  /*
-   * (non-Javadoc)
-   * @see org.sonatype.nexus.ruby.RubygemsFileFactory#mavenMetadata(java.lang.String, boolean)
-   */
   @Override
   public MavenMetadataFile mavenMetadata(String name, boolean prereleased) {
     String path = join(prereleased ? MAVEN_PRERELEASED_RUBYGEMS : MAVEN_RELEASED_RUBYGEMS,
@@ -149,10 +113,6 @@ public class DefaultRubygemsFileFactory
     return new MavenMetadataFile(this, path, name, prereleased);
   }
 
-  /*
-   * (non-Javadoc)
-   * @see org.sonatype.nexus.ruby.RubygemsFileFactory#directory(java.lang.String, java.lang.String[])
-   */
   @Override
   public Directory directory(String path, String... items) {
     if (!path.endsWith("/")) {
@@ -164,10 +124,6 @@ public class DefaultRubygemsFileFactory
         items);
   }
 
-  /*
-   * (non-Javadoc)
-   * @see org.sonatype.nexus.ruby.RubygemsFileFactory#rubygemsDirectory(java.lang.String)
-   */
   @Override
   public RubygemsDirectory rubygemsDirectory(String path) {
     if (!path.endsWith("/")) {
@@ -176,10 +132,6 @@ public class DefaultRubygemsFileFactory
     return new RubygemsDirectory(this, path);
   }
 
-  /*
-   * (non-Javadoc)
-   * @see org.sonatype.nexus.ruby.RubygemsFileFactory#gemArtifactIdDirectory(java.lang.String, java.lang.String, boolean)
-   */
   @Override
   public GemArtifactIdDirectory gemArtifactIdDirectory(String path, String name, boolean prereleases) {
     if (!path.endsWith("/")) {
@@ -188,10 +140,6 @@ public class DefaultRubygemsFileFactory
     return new GemArtifactIdDirectory(this, path, name, prereleases);
   }
 
-  /*
-   * (non-Javadoc)
-   * @see org.sonatype.nexus.ruby.RubygemsFileFactory#gemArtifactIdVersionDirectory(java.lang.String, java.lang.String, java.lang.String, boolean)
-   */
   @Override
   public Directory gemArtifactIdVersionDirectory(String path, String name, String version, boolean prerelease) {
     if (!path.endsWith("/")) {
@@ -200,10 +148,6 @@ public class DefaultRubygemsFileFactory
     return new GemArtifactIdVersionDirectory(this, path, name, version, prerelease);
   }
 
-  /*
-   * (non-Javadoc)
-   * @see org.sonatype.nexus.ruby.layout.Layout#gemFile(java.lang.String, java.lang.String)
-   */
   @Override
   public GemFile gemFile(String name, String version, String platform) {
     String filename = BaseGemFile.toFilename(name, version, platform);
@@ -213,10 +157,6 @@ public class DefaultRubygemsFileFactory
         name, version, platform);
   }
 
-  /*
-   * (non-Javadoc)
-   * @see org.sonatype.nexus.ruby.layout.Layout#gemFile(java.lang.String)
-   */
   @Override
   public GemFile gemFile(String name) {
     return new GemFile(this,
@@ -225,10 +165,6 @@ public class DefaultRubygemsFileFactory
         name);
   }
 
-  /*
-   * (non-Javadoc)
-   * @see org.sonatype.nexus.ruby.layout.Layout#gemspecFile(java.lang.String, java.lang.String)
-   */
   @Override
   public GemspecFile gemspecFile(String name, String version, String platform) {
     String filename = BaseGemFile.toFilename(name, version, platform);
@@ -238,10 +174,6 @@ public class DefaultRubygemsFileFactory
         name, version, platform);
   }
 
-  /*
-   * (non-Javadoc)
-   * @see org.sonatype.nexus.ruby.layout.Layout#gemspecFile(java.lang.String)
-   */
   @Override
   public GemspecFile gemspecFile(String name) {
     return new GemspecFile(this,
@@ -250,10 +182,6 @@ public class DefaultRubygemsFileFactory
         name);
   }
 
-  /*
-   * (non-Javadoc)
-   * @see org.sonatype.nexus.ruby.layout.Layout#dependencyFile(java.lang.String)
-   */
   @Override
   public DependencyFile dependencyFile(String name) {
     return new DependencyFile(this,
@@ -262,10 +190,6 @@ public class DefaultRubygemsFileFactory
         name);
   }
 
-  /*
-   * (non-Javadoc)
-   * @see org.sonatype.nexus.ruby.layout.Layout#bundlerApiFile(java.lang.String)
-   */
   @Override
   public BundlerApiFile bundlerApiFile(String names) {
     return new BundlerApiFile(this,
@@ -275,10 +199,6 @@ public class DefaultRubygemsFileFactory
             .split(","));
   }
 
-  /*
-   * (non-Javadoc)
-   * @see org.sonatype.nexus.ruby.RubygemsFileFactory#bundlerApiFile(java.lang.String[])
-   */
   @Override
   public BundlerApiFile bundlerApiFile(String... names) {
     StringBuilder gems = new StringBuilder("?gems=");
@@ -290,10 +210,6 @@ public class DefaultRubygemsFileFactory
         names);
   }
 
-  /*
-   * (non-Javadoc)
-   * @see org.sonatype.nexus.ruby.layout.Layout#apiV1File(java.lang.String)
-   */
   @Override
   public ApiV1File apiV1File(String name) {
     return new ApiV1File(this,
@@ -302,37 +218,21 @@ public class DefaultRubygemsFileFactory
         name);
   }
 
-  /*
-   * (non-Javadoc)
-   * @see org.sonatype.nexus.ruby.RubygemsFileFactory#specsIndexFile(org.sonatype.nexus.ruby.SpecsIndexType)
-   */
   @Override
   public SpecsIndexFile specsIndexFile(SpecsIndexType type) {
     return this.specsIndexFile(type.filename().replace(RootCuba._4_8, ""));
   }
 
-  /*
-   * (non-Javadoc)
-   * @see org.sonatype.nexus.ruby.RubygemsFileFactory#specsIndexFile(java.lang.String)
-   */
   @Override
   public SpecsIndexFile specsIndexFile(String name) {
     return new SpecsIndexFile(this, join(SEPARATOR, name, RootCuba._4_8), name);
   }
 
-  /*
-   * (non-Javadoc)
-   * @see org.sonatype.nexus.ruby.RubygemsFileFactory#specsIndexZippedFile(java.lang.String)
-   */
   @Override
   public SpecsIndexZippedFile specsIndexZippedFile(String name) {
     return new SpecsIndexZippedFile(this, join(SEPARATOR, name, RootCuba._4_8, RootCuba.GZ), name);
   }
 
-  /*
-   * (non-Javadoc)
-   * @see org.sonatype.nexus.ruby.RubygemsFileFactory#specsIndexZippedFile(org.sonatype.nexus.ruby.SpecsIndexType)
-   */
   @Override
   public SpecsIndexZippedFile specsIndexZippedFile(SpecsIndexType type) {
     return this.specsIndexZippedFile(type.filename().replace(RootCuba._4_8, ""));
