@@ -38,7 +38,7 @@ public class SyncRubygemsMetadataTaskDescriptor
   }
 
   public String getName() {
-    return "Syncronize Rubygems Metadata Files";
+    return "Synchronize Rubygems Metadata Files";
   }
 
   @SuppressWarnings("rawtypes")
