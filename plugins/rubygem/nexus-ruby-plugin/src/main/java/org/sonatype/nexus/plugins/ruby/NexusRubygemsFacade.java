@@ -22,6 +22,7 @@ import java.util.TreeSet;
 
 import org.sonatype.nexus.proxy.AccessDeniedException;
 import org.sonatype.nexus.proxy.IllegalOperationException;
+import org.sonatype.nexus.proxy.IllegalRequestException;
 import org.sonatype.nexus.proxy.ItemNotFoundException;
 import org.sonatype.nexus.proxy.NoSuchResourceStoreException;
 import org.sonatype.nexus.proxy.RemoteAccessException;
@@ -111,6 +112,9 @@ public class NexusRubygemsFacade
       case PAYLOAD:
         return (StorageItem) file.get();
       case FORBIDDEN:
+          throw new IllegalRequestException(new ResourceStoreRequest(file.remotePath()),
+              "Repository with ID='" + repository.getId()
+              + "' does not allow deleting '" + file.remotePath() + "'.");
       case NOT_EXISTS:
       case TEMP_UNAVAILABLE:
       case NEW_INSTANCE:
