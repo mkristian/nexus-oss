@@ -24,7 +24,6 @@ import org.sonatype.nexus.ruby.cuba.State;
 public class MavenReleasesRubygemsCuba
     implements Cuba
 {
-
   /**
    * directories one for each gem (name without version)
    */
