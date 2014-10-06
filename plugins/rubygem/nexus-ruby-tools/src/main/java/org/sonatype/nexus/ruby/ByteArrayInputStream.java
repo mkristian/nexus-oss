@@ -33,28 +33,16 @@ public class ByteArrayInputStream
     this.bytes = bytes;
   }
 
-  /*
-   * (non-Javadoc)
-   * @see java.io.InputStream#available()
-   */
   @Override
   public int available() throws IOException {
     return bytes.size() - cursor;
   }
 
-  /*
-   * (non-Javadoc)
-   * @see java.io.InputStream#reset()
-   */
   @Override
   public void reset() throws IOException {
     cursor = 0;
   }
 
-  /*
-   * (non-Javadoc)
-   * @see java.io.InputStream#read()
-   */
   @Override
   public int read() throws IOException {
     if (cursor < bytes.size()) {
