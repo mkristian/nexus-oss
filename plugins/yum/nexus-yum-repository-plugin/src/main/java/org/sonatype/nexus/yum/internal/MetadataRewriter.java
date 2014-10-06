@@ -42,6 +42,8 @@ import org.sonatype.nexus.util.DigesterUtils;
 
 import com.google.common.base.Throwables;
 import org.apache.commons.io.IOUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -55,6 +57,8 @@ import static org.sonatype.nexus.yum.Yum.PATH_OF_REPOMD_XML;
  */
 public class MetadataRewriter
 {
+
+  private static final Logger log = LoggerFactory.getLogger(MetadataRewriter.class);
 
   private MetadataRewriter() {
   }
@@ -70,6 +74,7 @@ public class MetadataRewriter
   public static void rewritePrimaryLocationsAfterMerge(final Repository repository,
                                                        final List<File> memberRepositoriesBaseDirs)
   {
+    log.debug("Checking if {}:primary.xml locations should be rewritten after merge", repository.getId());
     rewritePrimaryLocations(
         repository,
         new Processor()
@@ -112,6 +117,7 @@ public class MetadataRewriter
    * @param repository containing yum repository
    */
   public static void rewritePrimaryLocationsAfterProxy(final ProxyRepository repository) {
+    log.debug("Checking if {}:primary.xml locations should be rewritten after being proxied", repository.getId());
     final String repositoryUrl = repository.getRemoteUrl();
     rewritePrimaryLocations(
         repository,
@@ -148,6 +154,7 @@ public class MetadataRewriter
    * @param repository containing repomd.xml
    */
   public static void removeSqliteFromRepoMD(final Repository repository) {
+    log.debug("Checking if sqlite databases should be removed from {}:repomd.xml", repository.getId());
     try {
       boolean changed = false;
       Document doc;
@@ -170,6 +177,7 @@ public class MetadataRewriter
       }
 
       if (changed) {
+        log.debug("Removing sqlite databases from {}:repomd.xml", repository.getId());
         ByteArrayOutputStream repoMDOut = new ByteArrayOutputStream();
         try (OutputStream out = new BufferedOutputStream(repoMDOut)) {
           Transformer transformer = TransformerFactory.newInstance().newTransformer();
@@ -216,6 +224,8 @@ public class MetadataRewriter
                                    final byte[] primaryContent)
       throws Exception
   {
+    log.debug("Rewriting {}:primary.xml locations", repository.getId());
+
     int openSize = primaryContent.length;
     String openSha256 = DigesterUtils.getDigest("SHA-256", new ByteArrayInputStream(primaryContent));
 
