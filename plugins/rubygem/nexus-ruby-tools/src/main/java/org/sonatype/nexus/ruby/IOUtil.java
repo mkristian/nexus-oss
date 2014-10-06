@@ -48,8 +48,6 @@ public class IOUtil
 
   /**
    * Copy bytes from an <code>InputStream</code> to an <code>OutputStream</code>.
-   *
-   * @param bufferSize Size of internal buffer to use.
    */
   public static void copy(final InputStream input, final OutputStream output) throws IOException {
     final byte[] buffer = new byte[4096];
