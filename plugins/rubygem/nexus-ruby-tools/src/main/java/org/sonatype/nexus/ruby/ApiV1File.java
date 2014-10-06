@@ -32,7 +32,7 @@ public class ApiV1File
    * @param filename of the gem
    * @return GemFile
    */
-  public GemFile gem(String gemFilename) {
-    return factory.gemFile(gemFilename.replaceFirst(".gem$", ""));
+  public GemFile gem(String filename) {
+    return factory.gemFile(filename.replaceFirst(".gem$", ""));
   }
 }
