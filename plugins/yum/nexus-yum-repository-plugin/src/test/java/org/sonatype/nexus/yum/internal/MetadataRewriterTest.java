@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.util.Arrays;
 import java.util.zip.GZIPInputStream;
 
+import org.sonatype.nexus.proxy.repository.ProxyRepository;
 import org.sonatype.nexus.proxy.repository.Repository;
 import org.sonatype.sisu.litmus.testsupport.TestSupport;
 import org.sonatype.sisu.litmus.testsupport.hamcrest.FileMatchers;
@@ -90,6 +91,48 @@ public class MetadataRewriterTest
       assertThat(
           new String(IOUtils.toByteArray(primaryIn)),
           is(equalTo(readFileToString(testData.resolveFile("repo3-result/repodata/primary.xml"))))
+      );
+    }
+  }
+
+  @Test
+  public void verifyRewriteOfPrimaryLocationsAfterProxy()
+      throws Exception
+  {
+    File workDir = new File(util.getTargetDir(), "work-" + System.currentTimeMillis());
+    FileUtils.copyDirectory(testData.resolveFile("repo5"), workDir);
+
+    ProxyRepository repository = mock(ProxyRepository.class);
+    when(repository.getLocalUrl()).thenReturn(workDir.getAbsolutePath());
+    when(repository.getRemoteUrl()).thenReturn("http://localhost:8082/nexus/content/repositories/thirdparty");
+
+    MetadataRewriter.rewritePrimaryLocationsAfterProxy(repository);
+
+    // check that we have a new primary.xml
+    File newPrimary = new File(
+        workDir,
+        "repodata/8ef31e4bdca995f6fe5b7a63387ddc60c718175ca6eaec9d4cadbefb81fd5828-primary.xml.gz"
+    );
+    assertThat(newPrimary, FileMatchers.exists());
+
+    // check that we old primary.xml was removed
+    File oldPrimary = new File(
+        workDir,
+        "repodata/57a84398efb9478dd2fc2d23467b55479939ff3a48f21d0beacd0b5849713f48-primary.xml.gz"
+    );
+    assertThat(oldPrimary, not(FileMatchers.exists()));
+
+    // compare repomd.xml content
+    assertThat(
+        readFileToString(new File(workDir, "repodata/repomd.xml")),
+        is(equalTo(readFileToString(testData.resolveFile("repo5-result/repodata/repomd.xml"))))
+    );
+
+    // compare primary.xml content
+    try (InputStream primaryIn = new GZIPInputStream(new BufferedInputStream(new FileInputStream(newPrimary)))) {
+      assertThat(
+          new String(IOUtils.toByteArray(primaryIn)),
+          is(equalTo(readFileToString(testData.resolveFile("repo5-result/repodata/primary.xml"))))
       );
     }
   }

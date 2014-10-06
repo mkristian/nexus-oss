@@ -34,6 +34,7 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.sonatype.nexus.proxy.repository.ProxyRepository;
 import org.sonatype.nexus.proxy.repository.Repository;
 import org.sonatype.nexus.util.DigesterUtils;
 
@@ -95,6 +96,43 @@ public class MetadataRewriter
                   location.removeAttribute("xml:base");
                   return true;
                 }
+              }
+            }
+            return false;
+          }
+        }
+    );
+  }
+
+  /**
+   * Rewrites locations in primary.xml after it had been proxied.
+   * All locations that have an xml:base + url matching repository url will be changed to be relative to repository.
+   *
+   * @param repository containing yum repository
+   */
+  public static void rewritePrimaryLocationsAfterProxy(final ProxyRepository repository) {
+    final String repositoryUrl = repository.getRemoteUrl();
+    rewritePrimaryLocations(
+        repository,
+        new Processor()
+        {
+          @Override
+          public boolean process(final Element location) {
+            String xmlBase = location.getAttribute("xml:base");
+            if (xmlBase != null) {
+              String href = location.getAttribute("href");
+              if (!xmlBase.endsWith("/")) {
+                xmlBase += "/";
+              }
+              href = xmlBase + href;
+              if (href.startsWith(repositoryUrl)) {
+                href = href.substring(repositoryUrl.length());
+                if (href.startsWith("/")) {
+                  href = href.substring(1);
+                }
+                location.setAttribute("href", href);
+                location.removeAttribute("xml:base");
+                return true;
               }
             }
             return false;
