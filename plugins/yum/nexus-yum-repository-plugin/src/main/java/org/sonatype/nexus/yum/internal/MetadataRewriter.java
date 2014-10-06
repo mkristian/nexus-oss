@@ -17,11 +17,8 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.file.Files;
 import java.util.List;
 import java.util.Objects;
 import java.util.zip.GZIPInputStream;
@@ -34,12 +31,16 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
+import org.sonatype.nexus.proxy.ResourceStoreRequest;
+import org.sonatype.nexus.proxy.item.ContentLocator;
+import org.sonatype.nexus.proxy.item.DefaultStorageFileItem;
+import org.sonatype.nexus.proxy.item.PreparedContentLocator;
+import org.sonatype.nexus.proxy.item.StorageFileItem;
 import org.sonatype.nexus.proxy.repository.ProxyRepository;
 import org.sonatype.nexus.proxy.repository.Repository;
 import org.sonatype.nexus.util.DigesterUtils;
 
 import com.google.common.base.Throwables;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -148,12 +149,12 @@ public class MetadataRewriter
    */
   public static void removeSqliteFromRepoMD(final Repository repository) {
     try {
-      File repositoryBaseDir = RepositoryUtils.getBaseDir(repository);
-
       boolean changed = false;
       Document doc;
-      File repoMDFile = new File(repositoryBaseDir, PATH_OF_REPOMD_XML);
-      try (InputStream in = new BufferedInputStream(new FileInputStream(repoMDFile))) {
+      StorageFileItem repoMDItem = (StorageFileItem) repository.retrieveItem(
+          false, new ResourceStoreRequest("/" + PATH_OF_REPOMD_XML)
+      );
+      try (InputStream in = new BufferedInputStream(repoMDItem.getInputStream())) {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
 
@@ -169,10 +170,12 @@ public class MetadataRewriter
       }
 
       if (changed) {
-        try (OutputStream out = new BufferedOutputStream(new FileOutputStream(repoMDFile))) {
+        ByteArrayOutputStream repoMDOut = new ByteArrayOutputStream();
+        try (OutputStream out = new BufferedOutputStream(repoMDOut)) {
           Transformer transformer = TransformerFactory.newInstance().newTransformer();
           transformer.transform(new DOMSource(doc), new StreamResult(out));
         }
+        storeItem(repository, PATH_OF_REPOMD_XML, repoMDOut.toByteArray(), "application/xml");
       }
     }
     catch (Exception e) {
@@ -189,12 +192,11 @@ public class MetadataRewriter
    */
   public static void rewritePrimaryLocations(final Repository repository, final Processor processor) {
     try {
-      File repositoryBaseDir = RepositoryUtils.getBaseDir(repository);
-      byte[] repoMDContent = readRepoMD(repositoryBaseDir);
-      byte[] primaryContent = processPrimary(repositoryBaseDir, processor, repoMDContent);
+      byte[] repoMDContent = readRepoMD(repository);
+      byte[] primaryContent = processPrimary(repository, processor, repoMDContent);
 
       if (primaryContent != null) {
-        storePrimary(repositoryBaseDir, repoMDContent, primaryContent);
+        storePrimary(repository, repoMDContent, primaryContent);
       }
     }
     catch (Exception e) {
@@ -205,11 +207,11 @@ public class MetadataRewriter
   /**
    * Store primary.xml and update content of repomd.xml accordingly.
    *
-   * @param repositoryBaseDir base dir of repository containing primary.xml/repomd.xml
-   * @param repoMDContent     repomd.xml content
-   * @param primaryContent    primary.xml
+   * @param repository     repository containing primary.xml/repomd.xml
+   * @param repoMDContent  repomd.xml content
+   * @param primaryContent primary.xml
    */
-  private static void storePrimary(final File repositoryBaseDir,
+  private static void storePrimary(final Repository repository,
                                    final byte[] repoMDContent,
                                    final byte[] primaryContent)
       throws Exception
@@ -251,10 +253,27 @@ public class MetadataRewriter
     transformer.transform(new DOMSource(doc), new StreamResult(repoMDOut));
 
     if (!Objects.equals(primaryNameOld, primaryNameNew)) {
-      Files.delete(new File(repositoryBaseDir, primaryNameOld).toPath());
+      repository.deleteItem(false, new ResourceStoreRequest("/" + primaryNameOld));
     }
-    FileUtils.writeByteArrayToFile(new File(repositoryBaseDir, primaryNameNew), primaryCompressedContent);
-    FileUtils.writeByteArrayToFile(new File(repositoryBaseDir, PATH_OF_REPOMD_XML), repoMDOut.toByteArray());
+    storeItem(repository, primaryNameNew, primaryCompressedContent, "application/x-gzip");
+    storeItem(repository, PATH_OF_REPOMD_XML, repoMDOut.toByteArray(), "application/xml");
+  }
+
+  private static void storeItem(final Repository repository,
+                                final String path,
+                                final byte[] content,
+                                final String mimeType)
+      throws Exception
+  {
+    DefaultStorageFileItem item = new DefaultStorageFileItem(
+        repository,
+        new ResourceStoreRequest("/" + path),
+        true,
+        true,
+        new PreparedContentLocator(new ByteArrayInputStream(content), mimeType, ContentLocator.UNKNOWN_LENGTH)
+    );
+
+    repository.storeItem(false, item);
   }
 
   /**
@@ -279,12 +298,12 @@ public class MetadataRewriter
   /**
    * Read and process all location entries using provided processor.
    *
-   * @param repositoryBaseDir base dir of repository containing primary.xml
-   * @param processor         location processor
-   * @param repoMDContent     repomx.xml content
+   * @param repository    repository containing primary.xml
+   * @param processor     location processor
+   * @param repoMDContent repomx.xml content
    * @return content of primary.xml after processing
    */
-  private static byte[] processPrimary(final File repositoryBaseDir,
+  private static byte[] processPrimary(final Repository repository,
                                        final Processor processor,
                                        final byte[] repoMDContent)
       throws Exception
@@ -296,8 +315,10 @@ public class MetadataRewriter
 
     byte[] primaryContent = null;
 
-    File primaryFile = new File(repositoryBaseDir, repoMD.getLocation("primary"));
-    try (InputStream primaryIn = new GZIPInputStream(new BufferedInputStream(new FileInputStream(primaryFile)))) {
+    StorageFileItem primaryItem = (StorageFileItem) repository.retrieveItem(
+        false, new ResourceStoreRequest("/" + repoMD.getLocation("primary"))
+    );
+    try (InputStream primaryIn = new GZIPInputStream(new BufferedInputStream(primaryItem.getInputStream()))) {
       Document doc = documentBuilder.parse(primaryIn);
       NodeList locations = doc.getElementsByTagName("location");
       if (locations != null) {
@@ -323,14 +344,17 @@ public class MetadataRewriter
   /**
    * Read content of repomd.xml.
    *
-   * @param repositoryBaseDir base dir of repository containing repomd.xml
+   * @param repository repository containing repomd.xml
    * @return content of repomd.xml
    */
-  private static byte[] readRepoMD(final File repositoryBaseDir)
+  private static byte[] readRepoMD(final Repository repository)
       throws Exception
   {
+    StorageFileItem repoMDItem = (StorageFileItem) repository.retrieveItem(
+        false, new ResourceStoreRequest("/" + PATH_OF_REPOMD_XML)
+    );
     byte[] repoMDBytes;
-    try (InputStream in = new FileInputStream(new File(repositoryBaseDir, PATH_OF_REPOMD_XML))) {
+    try (InputStream in = repoMDItem.getInputStream()) {
       repoMDBytes = IOUtils.toByteArray(in);
     }
     return repoMDBytes;
