@@ -13,10 +13,12 @@
 package org.sonatype.nexus.yum.internal;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.file.Files;
@@ -35,6 +37,7 @@ import javax.xml.transform.stream.StreamResult;
 import org.sonatype.nexus.proxy.repository.Repository;
 import org.sonatype.nexus.util.DigesterUtils;
 
+import com.google.common.base.Throwables;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
@@ -99,6 +102,40 @@ public class MetadataRewriter
           }
         }
     );
+  }
+
+  public static void removeSqliteFromRepoMD(final Repository repository) {
+    try {
+      File repositoryBaseDir = RepositoryUtils.getBaseDir(repository);
+
+      boolean changed = false;
+      Document doc;
+      File repoMDFile = new File(repositoryBaseDir, PATH_OF_REPOMD_XML);
+      try (InputStream in = new BufferedInputStream(new FileInputStream(repoMDFile))) {
+        DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
+        DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
+
+        doc = documentBuilder.parse(in);
+        NodeList datas = doc.getElementsByTagName("data");
+        for (int i = 0; i < datas.getLength(); i++) {
+          Element data = (Element) datas.item(i);
+          if (data.getAttribute("type").endsWith("_db")) {
+            data.getParentNode().removeChild(data);
+            changed = true;
+          }
+        }
+      }
+
+      if (changed) {
+        try (OutputStream out = new BufferedOutputStream(new FileOutputStream(repoMDFile))) {
+          Transformer transformer = TransformerFactory.newInstance().newTransformer();
+          transformer.transform(new DOMSource(doc), new StreamResult(out));
+        }
+      }
+    }
+    catch (Exception e) {
+      throw Throwables.propagate(e);
+    }
   }
 
   /**

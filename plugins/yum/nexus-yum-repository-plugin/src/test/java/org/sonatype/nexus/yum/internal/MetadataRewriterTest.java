@@ -94,4 +94,23 @@ public class MetadataRewriterTest
     }
   }
 
+  @Test
+  public void verifyRemoveOfSqliteFromRepoMD()
+      throws Exception
+  {
+    File workDir = new File(util.getTargetDir(), "work-" + System.currentTimeMillis());
+    FileUtils.copyDirectory(testData.resolveFile("repo4"), workDir);
+
+    Repository repository = mock(Repository.class);
+    when(repository.getLocalUrl()).thenReturn(workDir.getAbsolutePath());
+
+    MetadataRewriter.removeSqliteFromRepoMD(repository);
+
+    // compare repomd.xml content
+    assertThat(
+        readFileToString(new File(workDir, "repodata/repomd.xml")),
+        is(equalTo(readFileToString(testData.resolveFile("repo4-result/repodata/repomd.xml"))))
+    );
+  }
+
 }
