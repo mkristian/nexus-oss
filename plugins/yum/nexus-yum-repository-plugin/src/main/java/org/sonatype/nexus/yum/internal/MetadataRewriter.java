@@ -67,7 +67,6 @@ public class MetadataRewriter
    */
   public static void rewritePrimaryLocationsAfterMerge(final Repository repository,
                                                        final List<File> memberRepositoriesBaseDirs)
-      throws Exception
   {
     rewritePrimaryLocations(
         repository,
@@ -145,15 +144,18 @@ public class MetadataRewriter
    * @param repository containing primary.xml
    * @param processor  location processor
    */
-  public static void rewritePrimaryLocations(final Repository repository, final Processor processor)
-      throws Exception
-  {
-    File repositoryBaseDir = RepositoryUtils.getBaseDir(repository);
-    byte[] repoMDContent = readRepoMD(repositoryBaseDir);
-    byte[] primaryContent = processPrimary(repositoryBaseDir, processor, repoMDContent);
+  public static void rewritePrimaryLocations(final Repository repository, final Processor processor) {
+    try {
+      File repositoryBaseDir = RepositoryUtils.getBaseDir(repository);
+      byte[] repoMDContent = readRepoMD(repositoryBaseDir);
+      byte[] primaryContent = processPrimary(repositoryBaseDir, processor, repoMDContent);
 
-    if (primaryContent != null) {
-      storePrimary(repositoryBaseDir, repoMDContent, primaryContent);
+      if (primaryContent != null) {
+        storePrimary(repositoryBaseDir, repoMDContent, primaryContent);
+      }
+    }
+    catch (Exception e) {
+      throw Throwables.propagate(e);
     }
   }
 
