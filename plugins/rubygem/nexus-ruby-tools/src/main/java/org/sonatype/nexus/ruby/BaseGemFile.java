@@ -41,9 +41,7 @@ public class BaseGemFile
   /**
    * contructor using the full filename of a gem. there is no version nor platform info available
    */
-  BaseGemFile(RubygemsFileFactory factory, FileType type, String storage, String remote,
-              String filename)
-  {
+  BaseGemFile(RubygemsFileFactory factory, FileType type, String storage, String remote, String filename) {
     this(factory, type, storage, remote, filename, null, null);
   }
 
