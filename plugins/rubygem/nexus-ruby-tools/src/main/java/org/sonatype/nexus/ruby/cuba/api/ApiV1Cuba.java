@@ -48,8 +48,7 @@ public class ApiV1Cuba
       case API_KEY:
         return state.context.factory.apiV1File(state.name);
       case "":
-        return state.context.factory.directory(state.context.original,
-            new String[]{API_KEY, DEPENDENCIES});
+        return state.context.factory.directory(state.context.original, API_KEY, DEPENDENCIES);
       default:
         return state.context.factory.notFound(state.context.original);
     }
