@@ -12,33 +12,28 @@
  */
 package org.sonatype.nexus.yum.internal;
 
+import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.Arrays;
-import java.util.Map;
+import java.util.zip.GZIPInputStream;
 
-import org.sonatype.nexus.proxy.ResourceStoreRequest;
-import org.sonatype.nexus.proxy.item.StorageFileItem;
 import org.sonatype.nexus.proxy.repository.Repository;
 import org.sonatype.sisu.litmus.testsupport.TestSupport;
+import org.sonatype.sisu.litmus.testsupport.hamcrest.FileMatchers;
 import org.sonatype.sisu.litmus.testsupport.junit.TestDataRule;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.junit.Rule;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 import static org.apache.commons.io.FileUtils.readFileToString;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Matchers.any;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.sonatype.sisu.litmus.testsupport.hamcrest.DiffMatchers.equalTo;
 
@@ -59,47 +54,44 @@ public class MetadataRewriterTest
   public void verifyRewriteOfPrimaryLocationsAfterMerge()
       throws Exception
   {
+    File workDir = new File(util.getTargetDir(), "work-" + System.currentTimeMillis());
+    FileUtils.copyDirectory(testData.resolveFile("repo3"), workDir);
+
     Repository repository = mock(Repository.class);
-    when(repository.retrieveItem(any(ResourceStoreRequest.class))).thenAnswer(new Answer<StorageFileItem>()
-    {
-      @Override
-      public StorageFileItem answer(final InvocationOnMock invocationOnMock) throws Throwable {
-        ResourceStoreRequest request = (ResourceStoreRequest) invocationOnMock.getArguments()[0];
-        StorageFileItem storageFileItem = mock(StorageFileItem.class);
-        when(storageFileItem.getInputStream()).thenReturn(
-            new FileInputStream(testData.resolveFile("repo3" + request.getRequestPath()))
-        );
-        return storageFileItem;
-      }
-    });
+    when(repository.getLocalUrl()).thenReturn(workDir.getAbsolutePath());
+
     MetadataRewriter.rewritePrimaryLocationsAfterMerge(
         repository,
         Arrays.asList(new File(STORAGE + "releases"), new File(STORAGE + "thirdparty"))
     );
 
-    ArgumentCaptor<ResourceStoreRequest> requests = ArgumentCaptor.forClass(ResourceStoreRequest.class);
-    ArgumentCaptor<InputStream> streams = ArgumentCaptor.forClass(InputStream.class);
-    verify(repository, times(2)).storeItem(requests.capture(), streams.capture(), Mockito.any(Map.class));
-
-    // check that first stored is primary.xml with a new name
-    assertThat(requests.getAllValues().get(0).getRequestPath(), is(
-        "/repodata/2fefc2f0541419d2dcf3fc73d2b8db1cc5782d522443b51b954c4e94d5a8c001-primary.xml.gz"
-    ));
-
-    // check that second stored is repomd.xml
-    assertThat(requests.getAllValues().get(1).getRequestPath(), is("/repodata/repomd.xml"));
-
-    // compare primary.xml content
-    assertThat(
-        IOUtils.toString(streams.getAllValues().get(0)),
-        is(equalTo(readFileToString(testData.resolveFile("repo3/repodata/primary-result.xml"))))
+    // check that we have a new primary.xml
+    File newPrimary = new File(
+        workDir,
+        "repodata/2fefc2f0541419d2dcf3fc73d2b8db1cc5782d522443b51b954c4e94d5a8c001-primary.xml.gz"
     );
+    assertThat(newPrimary, FileMatchers.exists());
+
+    // check that we old primary.xml was removed
+    File oldPrimary = new File(
+        workDir,
+        "repodata/b7bad82bc89d0c651f8aeefffa3b43e69725c6fc0cc4dd840ecb999698861428-primary.xml.gz"
+    );
+    assertThat(oldPrimary, not(FileMatchers.exists()));
 
     // compare repomd.xml content
     assertThat(
-        IOUtils.toString(streams.getAllValues().get(1)),
-        is(equalTo(readFileToString(testData.resolveFile("repo3/repodata/repomd-result.xml"))))
+        readFileToString(new File(workDir, "repodata/repomd.xml")),
+        is(equalTo(readFileToString(testData.resolveFile("repo3-result/repodata/repomd.xml"))))
     );
+
+    // compare primary.xml content
+    try (InputStream primaryIn = new GZIPInputStream(new BufferedInputStream(new FileInputStream(newPrimary)))) {
+      assertThat(
+          new String(IOUtils.toByteArray(primaryIn)),
+          is(equalTo(readFileToString(testData.resolveFile("repo3-result/repodata/primary.xml"))))
+      );
+    }
   }
 
 }
