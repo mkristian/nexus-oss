@@ -106,10 +106,7 @@ public class DefaultRubygemsGateway
 
   @SuppressWarnings("resource")
   @Override
-  public InputStream deleteSpec(Object spec,
-                                InputStream specsIndex,
-                                InputStream releasesSpecs)
-  {
+  public InputStream deleteSpec(Object spec, InputStream specsIndex, InputStream releasesSpecs) {
     try {
       @SuppressWarnings("unchecked")
       List<Long> array = (List<Long>) callMethod("delete_spec",
@@ -129,9 +126,7 @@ public class DefaultRubygemsGateway
 
   @SuppressWarnings("resource")
   @Override
-  public InputStream mergeSpecs(List<InputStream> streams,
-                                boolean latest)
-  {
+  public InputStream mergeSpecs(List<InputStream> streams, boolean latest) {
     try {
       @SuppressWarnings("unchecked")
       List<Long> array = (List<Long>) callMethod("merge_specs",
@@ -174,8 +169,6 @@ public class DefaultRubygemsGateway
     return mergeDependencies(deps, false);
   }
 
-
-  @SuppressWarnings("resource")
   @Override
   public InputStream mergeDependencies(List<InputStream> deps, boolean unique) {
     try {
@@ -199,7 +192,6 @@ public class DefaultRubygemsGateway
     }
   }
 
-  @SuppressWarnings("resource")
   @Override
   public InputStream createDependencies(List<InputStream> gemspecs) {
     try {
