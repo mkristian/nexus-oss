@@ -30,8 +30,11 @@ public class ScriptWrapper
     this.object = object;
   }
 
+  /**
+   * Sub-class should override to provide custom object/script creation.
+   */
   protected Object newScript() {
-    throw new RuntimeException("not overwritten");
+    throw new UnsupportedOperationException();
   }
 
   protected void callMethod(String methodName, Object singleArg) {
