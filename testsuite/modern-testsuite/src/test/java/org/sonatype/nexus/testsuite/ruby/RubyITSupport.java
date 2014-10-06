@@ -26,7 +26,6 @@ import org.sonatype.nexus.ruby.BundleRunner;
 import org.sonatype.nexus.ruby.GemRunner;
 import org.sonatype.nexus.testsuite.support.NexusRunningITSupport;
 import org.sonatype.sisu.filetasks.FileTaskBuilder;
-import org.sonatype.sisu.goodies.common.Time;
 
 import org.hamcrest.Matcher;
 import org.jruby.embed.ScriptingContainer;
@@ -158,7 +157,6 @@ public abstract class RubyITSupport
                 .file(file(testData().resolveFile(nexusXML())))
                 .to().file(path("sonatype-work/nexus/conf/nexus.xml"))
         )
-        .setStartTimeout(Time.minutes(3).toSecondsI())
         .setPort(4711);
   }
 
