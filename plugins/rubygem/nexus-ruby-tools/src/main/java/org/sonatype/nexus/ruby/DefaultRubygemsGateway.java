@@ -56,10 +56,15 @@ public class DefaultRubygemsGateway
 
   @Override
   public DependencyData dependencies(InputStream is, String name, long modified) {
-    return new DependencyDataImpl(scriptingContainer,
-        callMethod("dependencies", new Object[]{name, is}, Object.class),
-        modified);
-  }
+    try {
+      return new DependencyDataImpl(scriptingContainer,
+          callMethod("dependencies", new Object[]{name, is}, Object.class),
+          modified);
+    }
+    finally {
+      IOUtil.close(is);
+    }
+ }
 
   @Override
   public InputStream emptyIndex() {
