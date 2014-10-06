@@ -12,6 +12,8 @@
  */
 package org.sonatype.nexus.yum.internal;
 
+import java.io.InputStream;
+
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Singleton;
@@ -20,11 +22,13 @@ import org.sonatype.nexus.proxy.IllegalOperationException;
 import org.sonatype.nexus.proxy.ItemNotFoundException;
 import org.sonatype.nexus.proxy.ResourceStoreRequest;
 import org.sonatype.nexus.proxy.access.AccessManager;
+import org.sonatype.nexus.proxy.access.Action;
 import org.sonatype.nexus.proxy.item.RepositoryItemUid;
 import org.sonatype.nexus.proxy.item.StorageFileItem;
 import org.sonatype.nexus.proxy.item.StorageItem;
 import org.sonatype.nexus.proxy.repository.AbstractRequestStrategy;
 import org.sonatype.nexus.proxy.repository.ProxyRepository;
+import org.sonatype.nexus.proxy.repository.Repository;
 import org.sonatype.nexus.proxy.repository.RequestStrategy;
 import org.sonatype.nexus.proxy.walker.AbstractFileWalkerProcessor;
 import org.sonatype.nexus.proxy.walker.DefaultWalkerContext;
@@ -33,6 +37,7 @@ import org.sonatype.nexus.proxy.walker.WalkerContext;
 import org.sonatype.nexus.proxy.walker.WalkerException;
 import org.sonatype.nexus.yum.Yum;
 
+import com.google.common.base.Throwables;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -58,6 +63,34 @@ public class ProxyMetadataRequestStrategy
   @Inject
   public ProxyMetadataRequestStrategy(final Walker walker) {
     this.walker = checkNotNull(walker);
+  }
+
+  @Override
+  public void onHandle(final Repository repository, final ResourceStoreRequest request, final Action action) {
+    if (request.getRequestPath().startsWith("/" + Yum.PATH_OF_REPODATA)) {
+      try {
+        log.trace("Checking if remote {}:{} changed", repository.getId(), REPOMD_XML_PATH);
+        long now = System.currentTimeMillis();
+        StorageFileItem repoMDItem = (StorageFileItem) repository.retrieveItem(
+            false, new ResourceStoreRequest(REPOMD_XML_PATH)
+        );
+        if (repoMDItem.getRepositoryItemAttributes().getStoredLocally() > now) {
+          MetadataRewriter.removeSqliteFromRepoMD(repository);
+        }
+        try (InputStream in = repoMDItem.getInputStream()) {
+          RepoMD repoMD = new RepoMD(in);
+          StorageFileItem primaryItem = (StorageFileItem) repository.retrieveItem(
+              false, new ResourceStoreRequest(REPOMD_XML_PATH)
+          );
+          if (primaryItem.getRepositoryItemAttributes().getStoredLocally() > now) {
+            MetadataRewriter.rewritePrimaryLocationsAfterProxy((ProxyRepository) repository);
+          }
+        }
+      }
+      catch (Exception e) {
+        throw Throwables.propagate(e);
+      }
+    }
   }
 
   @Override
