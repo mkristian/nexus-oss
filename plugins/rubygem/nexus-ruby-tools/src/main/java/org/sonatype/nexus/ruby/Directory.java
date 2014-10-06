@@ -44,10 +44,6 @@ public class Directory
     return items.toArray(new String[items.size()]);
   }
 
-  /*
-   * (non-Javadoc)
-   * @see org.sonatype.nexus.ruby.RubygemsFile#addToString(java.lang.StringBuilder)
-   */
   protected void addToString(StringBuilder builder) {
     super.addToString(builder);
     builder.append(", items=").append(items);
