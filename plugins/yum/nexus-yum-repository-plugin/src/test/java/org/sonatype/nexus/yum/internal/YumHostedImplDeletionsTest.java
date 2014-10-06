@@ -20,7 +20,6 @@ import java.util.concurrent.ScheduledThreadPoolExecutor;
 import org.sonatype.nexus.proxy.ItemNotFoundException;
 import org.sonatype.nexus.proxy.ResourceStoreRequest;
 import org.sonatype.nexus.proxy.repository.HostedRepository;
-import org.sonatype.nexus.rest.RepositoryURLBuilder;
 import org.sonatype.nexus.scheduling.NexusScheduler;
 import org.sonatype.nexus.yum.YumHosted;
 import org.sonatype.nexus.yum.internal.task.GenerateMetadataTask;
@@ -73,7 +72,6 @@ public class YumHostedImplDeletionsTest
     );
 
     yum = new YumHostedImpl(
-        mock(RepositoryURLBuilder.class),
         nexusScheduler,
         new ScheduledThreadPoolExecutor(10),
         new BlockSqliteDatabasesRequestStrategy(),

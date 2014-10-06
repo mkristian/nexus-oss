@@ -37,6 +37,7 @@ import org.sonatype.nexus.scheduling.AbstractNexusTask;
 import org.sonatype.nexus.scheduling.NexusScheduler;
 import org.sonatype.nexus.yum.Yum;
 import org.sonatype.nexus.yum.YumRepository;
+import org.sonatype.nexus.yum.internal.MetadataRewriter;
 import org.sonatype.nexus.yum.internal.RepoMD;
 import org.sonatype.nexus.yum.internal.RepositoryUtils;
 import org.sonatype.nexus.yum.internal.YumRepositoryImpl;
@@ -98,6 +99,7 @@ public class MergeMetadataTask
         if (memberReposBaseDirs.size() > 1) {
           log.debug("Merging repository group '{}' out of {}", groupRepository.getId(), memberReposBaseDirs);
           commandLineExecutor.exec(buildCommand(repoBaseDir, memberReposBaseDirs));
+          MetadataRewriter.rewritePrimaryLocationsAfterMerge(groupRepository, memberReposBaseDirs);
           log.debug("Group repository '{}' merged", groupRepository.getId());
         }
         else {
@@ -148,7 +150,7 @@ public class MergeMetadataTask
           }
         }
         // all metadata files are available by now so lets use it
-        baseDirs.add(RepositoryUtils.getBaseDir(memberRepository));
+        baseDirs.add(RepositoryUtils.getBaseDir(memberRepository).getCanonicalFile());
       }
     }
     return baseDirs;
@@ -224,7 +226,7 @@ public class MergeMetadataTask
     final StringBuilder repos = new StringBuilder();
     for (File memberRepoBaseDir : memberRepoBaseDirs) {
       repos.append(" --repo=");
-      repos.append(memberRepoBaseDir.toURI().toString());
+      repos.append(memberRepoBaseDir.toURI().toASCIIString());
     }
     return format("mergerepo --no-database %s -o %s", repos.toString(), repoBaseDir.getAbsolutePath());
   }
