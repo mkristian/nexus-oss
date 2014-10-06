@@ -26,7 +26,6 @@ import org.sonatype.nexus.ruby.RubygemsFileFactory;
 
 public class Context
 {
-
   public final String original;
 
   public final String query;
