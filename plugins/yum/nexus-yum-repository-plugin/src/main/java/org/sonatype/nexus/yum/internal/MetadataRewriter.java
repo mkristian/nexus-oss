@@ -19,7 +19,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
 import java.util.List;
+import java.util.Objects;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -138,7 +140,8 @@ public class MetadataRewriter
     int compressedSize = primaryCompressedContent.length;
     String compressedSha256 = DigesterUtils.getDigest("SHA-256", new ByteArrayInputStream(primaryCompressedContent));
 
-    String primaryName = null;
+    String primaryNameOld = null;
+    String primaryNameNew = null;
 
     DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
     DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
@@ -154,9 +157,9 @@ public class MetadataRewriter
         data.getElementsByTagName("size").item(0).setTextContent(String.valueOf(compressedSize));
         data.getElementsByTagName("open-size").item(0).setTextContent(String.valueOf(openSize));
         Element location = (Element) data.getElementsByTagName("location").item(0);
-        String href = primaryName = location.getAttribute("href");
+        String href = primaryNameOld = primaryNameNew = location.getAttribute("href");
         if (href.contains(checksum)) {
-          location.setAttribute("href", primaryName = href.replace(checksum, compressedSha256));
+          location.setAttribute("href", primaryNameNew = href.replace(checksum, compressedSha256));
         }
       }
     }
@@ -165,7 +168,10 @@ public class MetadataRewriter
     Transformer transformer = TransformerFactory.newInstance().newTransformer();
     transformer.transform(new DOMSource(doc), new StreamResult(repoMDOut));
 
-    FileUtils.writeByteArrayToFile(new File(repositoryBaseDir, primaryName), primaryCompressedContent);
+    if (!Objects.equals(primaryNameOld, primaryNameNew)) {
+      Files.delete(new File(repositoryBaseDir, primaryNameOld).toPath());
+    }
+    FileUtils.writeByteArrayToFile(new File(repositoryBaseDir, primaryNameNew), primaryCompressedContent);
     FileUtils.writeByteArrayToFile(new File(repositoryBaseDir, PATH_OF_REPOMD_XML), repoMDOut.toByteArray());
   }
 
@@ -242,8 +248,8 @@ public class MetadataRewriter
       throws Exception
   {
     byte[] repoMDBytes;
-    try (InputStream out = new FileInputStream(new File(repositoryBaseDir, PATH_OF_REPOMD_XML))) {
-      repoMDBytes = IOUtils.toByteArray(out);
+    try (InputStream in = new FileInputStream(new File(repositoryBaseDir, PATH_OF_REPOMD_XML))) {
+      repoMDBytes = IOUtils.toByteArray(in);
     }
     return repoMDBytes;
   }
