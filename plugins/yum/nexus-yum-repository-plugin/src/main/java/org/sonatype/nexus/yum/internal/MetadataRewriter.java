@@ -103,6 +103,11 @@ public class MetadataRewriter
     );
   }
 
+  /**
+   * Remove references to sqlite from repomd.xml
+   *
+   * @param repository containing repomd.xml
+   */
   public static void removeSqliteFromRepoMD(final Repository repository) {
     try {
       File repositoryBaseDir = RepositoryUtils.getBaseDir(repository);
