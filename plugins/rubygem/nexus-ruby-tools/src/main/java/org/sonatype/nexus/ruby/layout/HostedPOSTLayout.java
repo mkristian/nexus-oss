@@ -97,9 +97,6 @@ public class HostedPOSTLayout
     catch (IOException e) {
       file.setException(e);
     }
-    finally {
-      IOUtil.close(in);
-    }
   }
 
   /**

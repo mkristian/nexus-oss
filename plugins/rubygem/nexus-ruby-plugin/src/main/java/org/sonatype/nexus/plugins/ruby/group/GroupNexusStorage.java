@@ -173,7 +173,6 @@ public class GroupNexusStorage
       return item;
     }
     finally {
-      IOUtil.close(content);
       IOUtil.close(out);
     }
   }
