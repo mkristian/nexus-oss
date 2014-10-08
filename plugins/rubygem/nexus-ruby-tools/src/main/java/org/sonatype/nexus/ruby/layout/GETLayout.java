@@ -108,6 +108,7 @@ public class GETLayout
   public BundlerApiFile bundlerApiFile(String namesCommaSeparated) {
     BundlerApiFile file = super.bundlerApiFile(namesCommaSeparated);
 
+    // TODO change gateway to be able to use one InputStream after the other
     List<InputStream> deps = new LinkedList<>();
     try {
       retrieveAll(file, deps);
@@ -180,7 +181,9 @@ public class GETLayout
         file.markAsNotExists();
       }
       else {
-        store.memory(gateway.pom(store.getInputStream(gemspec), snapshot), file);
+        try(InputStream is = store.getInputStream(gemspec)) {
+          store.memory(gateway.pom(is, snapshot), file);
+        }
       }
     }
     catch (IOException e) {
@@ -283,7 +286,9 @@ public class GETLayout
    * load all the dependency data into an object.
    */
   protected DependencyData newDependencyData(DependencyFile file) throws IOException {
-    return gateway.dependencies(store.getInputStream(file), file.name(), store.getModified(file));
+    try(InputStream is = store.getInputStream(file)) {
+      return gateway.dependencies(is, file.name(), store.getModified(file));
+    }
   }
 
   @Override

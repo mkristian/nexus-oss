@@ -88,8 +88,8 @@ public class HostedGETLayout
       gemspec.markAsNotExists();
     }
     else {
-      try {
-        Object spec = gateway.spec(store.getInputStream(gemspec.gem()));
+      try(InputStream is = store.getInputStream(gemspec.gem())) {
+        Object spec = gateway.spec(is);
 
         // just update in case so no need to deal with concurrency
         // since once the file is there no update happen again
@@ -117,6 +117,7 @@ public class HostedGETLayout
    * create the <code>DependencyFile</code> for the given gem name
    */
   protected void createDependency(DependencyFile file) {
+    List<InputStream> gemspecs = new LinkedList<InputStream>();
     try {
       SpecsIndexFile specs = specsIndexFile(SpecsIndexType.RELEASE);
       store.retrieve(specs);
@@ -130,7 +131,6 @@ public class HostedGETLayout
         versions.addAll(gateway.listAllVersions(file.name(), is, store.getModified(specs), true));
       }
 
-      List<InputStream> gemspecs = new LinkedList<InputStream>();
       for (String version : versions) {
         // ruby platform is not part of the gemname
         GemspecFile gemspec = gemspecFile(file.name() + "-" + version.replaceFirst("-ruby$", ""));
@@ -146,6 +146,11 @@ public class HostedGETLayout
     }
     catch (IOException e) {
       file.setException(e);
+    }
+    finally {
+      for(InputStream is: gemspecs) {
+        IOUtil.close(is);
+      }
     }
   }
 }

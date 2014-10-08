@@ -59,7 +59,7 @@ public class DefaultRubygemsGateway
     return new DependencyDataImpl(scriptingContainer,
         callMethod("dependencies", new Object[]{name, is}, Object.class),
         modified);
-  }
+ }
 
   @Override
   public InputStream emptyIndex() {
@@ -71,32 +71,22 @@ public class DefaultRubygemsGateway
 
   @Override
   public Object spec(InputStream gem) {
-    try {
-      return callMethod("spec_get", gem, Object.class);
-    }
-    finally {
-      IOUtil.close(gem);
-    }
+    return callMethod("spec_get", gem, Object.class);
   }
 
   @SuppressWarnings("resource")
   @Override
   public InputStream addSpec(Object spec, InputStream specsIndex, SpecsIndexType type) {
-    try {
-      @SuppressWarnings("unchecked")
-      List<Long> array = (List<Long>) callMethod("add_spec",
-          new Object[]{
-              spec,
-              specsIndex,
-              type.name().toLowerCase()
-          },
-          List.class);
+    @SuppressWarnings("unchecked")
+    List<Long> array = (List<Long>) callMethod("add_spec",
+        new Object[]{
+            spec,
+            specsIndex,
+            type.name().toLowerCase()
+        },
+        List.class);
 
-      return array == null ? null : new ByteArrayInputStream(array);
-    }
-    finally {
-      IOUtil.close(specsIndex);
-    }
+    return array == null ? null : new ByteArrayInputStream(array);
   }
 
   @Override
@@ -107,61 +97,44 @@ public class DefaultRubygemsGateway
   @SuppressWarnings("resource")
   @Override
   public InputStream deleteSpec(Object spec, InputStream specsIndex, InputStream releasesSpecs) {
-    try {
-      @SuppressWarnings("unchecked")
-      List<Long> array = (List<Long>) callMethod("delete_spec",
-          new Object[]{
-              spec,
-              specsIndex,
-              releasesSpecs
-          },
-          List.class);
+    @SuppressWarnings("unchecked")
+    List<Long> array = (List<Long>) callMethod("delete_spec",
+        new Object[]{
+            spec,
+            specsIndex,
+            releasesSpecs
+        },
+        List.class);
 
-      return array == null ? null : new ByteArrayInputStream(array);
-    }
-    finally {
-      IOUtil.close(specsIndex);
-    }
+    return array == null ? null : new ByteArrayInputStream(array);
   }
 
   @SuppressWarnings("resource")
   @Override
   public InputStream mergeSpecs(List<InputStream> streams, boolean latest) {
-    try {
-      @SuppressWarnings("unchecked")
-      List<Long> array = (List<Long>) callMethod("merge_specs",
-          new Object[]{
-              streams,
-              latest
-          },
-          List.class);
+    @SuppressWarnings("unchecked")
+    List<Long> array = (List<Long>) callMethod("merge_specs",
+        new Object[]{
+            streams,
+            latest
+        },
+        List.class);
 
-      return array == null ? null : new ByteArrayInputStream(array);
-    }
-    finally {
-      for (InputStream in : streams) {
-        IOUtil.close(in);
-      }
-    }
+    return array == null ? null : new ByteArrayInputStream(array);
   }
 
   @Override
   public Map<String, InputStream> splitDependencies(InputStream deps) {
-    try {
-      @SuppressWarnings("unchecked")
-      Map<String, List<Long>> map = (Map<String, List<Long>>) callMethod("split_dependencies",
-          deps,
-          Map.class);
+    @SuppressWarnings("unchecked")
+    Map<String, List<Long>> map = (Map<String, List<Long>>) callMethod("split_dependencies",
+        deps,
+        Map.class);
 
-      Map<String, InputStream> result = new HashMap<>();
-      for (Map.Entry<String, List<Long>> entry : map.entrySet()) {
-        result.put(entry.getKey(), new ByteArrayInputStream(entry.getValue()));
-      }
-      return result;
+    Map<String, InputStream> result = new HashMap<>();
+    for (Map.Entry<String, List<Long>> entry : map.entrySet()) {
+      result.put(entry.getKey(), new ByteArrayInputStream(entry.getValue()));
     }
-    finally {
-      IOUtil.close(deps);
-    }
+    return result;
   }
 
   @Override
@@ -171,55 +144,36 @@ public class DefaultRubygemsGateway
 
   @Override
   public InputStream mergeDependencies(List<InputStream> deps, boolean unique) {
-    try {
-      Object[] args = new Object[deps.size() + 1];
-      args[0] = unique;
-      int index = 1;
-      for (InputStream is : deps) {
-        args[index++] = is;
-      }
-      @SuppressWarnings("unchecked")
-      List<Long> array = (List<Long>) callMethod("merge_dependencies",
-          args,
-          List.class);
+    Object[] args = new Object[deps.size() + 1];
+    args[0] = unique;
+    int index = 1;
+    for (InputStream is : deps) {
+      args[index++] = is;
+    }
+    @SuppressWarnings("unchecked")
+    List<Long> array = (List<Long>) callMethod("merge_dependencies",
+        args,
+        List.class);
 
-      return array == null ? null : new ByteArrayInputStream(array);
-    }
-    finally {
-      for (InputStream in : deps) {
-        IOUtil.close(in);
-      }
-    }
+    return array == null ? null : new ByteArrayInputStream(array);
   }
 
   @Override
   public InputStream createDependencies(List<InputStream> gemspecs) {
-    try {
-      @SuppressWarnings("unchecked")
-      List<Long> array = (List<Long>) (gemspecs.size() == 0 ?
-          callMethod("create_dependencies",
-              List.class) :
-          callMethod("create_dependencies",
-              gemspecs.toArray(),
-              List.class));
+    @SuppressWarnings("unchecked")
+    List<Long> array = (List<Long>) (gemspecs.size() == 0 ?
+        callMethod("create_dependencies",
+            List.class) :
+        callMethod("create_dependencies",
+            gemspecs.toArray(),
+            List.class));
 
-      return array == null ? null : new ByteArrayInputStream(array);
-    }
-    finally {
-      for (InputStream in : gemspecs) {
-        IOUtil.close(in);
-      }
-    }
+    return array == null ? null : new ByteArrayInputStream(array);
   }
 
   @Override
   public String pom(InputStream specRz, boolean snapshot) {
-    try {
-      return callMethod("to_pom", new Object[]{specRz, snapshot}, String.class);
-    }
-    finally {
-      IOUtil.close(specRz);
-    }
+    return callMethod("to_pom", new Object[]{specRz, snapshot}, String.class);
   }
 
   @SuppressWarnings("unchecked")
@@ -227,21 +181,15 @@ public class DefaultRubygemsGateway
   public synchronized List<String> listAllVersions(String name,
                                                    InputStream inputStream,
                                                    long modified,
-                                                   boolean prerelease)
-  {
-    try {
-      return (List<String>) callMethod("list_all_versions",
-          new Object[]{
-              name,
-              inputStream,
-              modified,
-              prerelease
-          },
-          List.class);
-    }
-    finally {
-      IOUtil.close(inputStream);
-    }
+                                                   boolean prerelease) {
+    return (List<String>) callMethod("list_all_versions",
+        new Object[]{
+            name,
+            inputStream,
+            modified,
+            prerelease
+        },
+        List.class);
   }
 
   @Override

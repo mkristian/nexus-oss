@@ -59,12 +59,13 @@ public class ProxiedGETLayout
         file.setException(expired.getException());
       }
       else if (expired.hasPayload()) {
-        InputStream bundlerResult = store.getInputStream(expired);
-        Map<String, InputStream> result = gateway.splitDependencies(bundlerResult);
-        for (Map.Entry<String, InputStream> entry : result.entrySet()) {
-          DependencyFile dep = super.dependencyFile(entry.getKey());
-          store.update(entry.getValue(), dep);
-          deps.add(store.getInputStream(dep));
+        try (InputStream bundlerResult = store.getInputStream(expired)) {
+          Map<String, InputStream> result = gateway.splitDependencies(bundlerResult);
+          for (Map.Entry<String, InputStream> entry : result.entrySet()) {
+            DependencyFile dep = super.dependencyFile(entry.getKey());
+            store.update(entry.getValue(), dep);
+            deps.add(store.getInputStream(dep));
+          }
         }
       }
       else {

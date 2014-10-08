@@ -52,18 +52,20 @@ public class HostedPOSTLayout
   }
 
   @Override
-  public void addGem(InputStream is, RubygemsFile file) {
+  public void addGem(InputStream in, RubygemsFile file) {
     if (file.type() != FileType.GEM && file.type() != FileType.API_V1) {
       throw new RuntimeException("BUG: not allowed to store " + file);
     }
     try {
-      store.create(is, file);
+      store.create(in, file);
       if (file.hasNoPayload()) {
         // an error or something else but we need the payload now
         return;
       }
-      is = store.getInputStream(file);
-      Object spec = gateway.spec(is);
+      Object spec;
+      try(InputStream is = store.getInputStream(file)) {
+        spec = gateway.spec(is);
+      }
 
       String filename = gateway.filename(spec);
       // check gemname matches coordinates from its specification
@@ -94,9 +96,6 @@ public class HostedPOSTLayout
     }
     catch (IOException e) {
       file.setException(e);
-    }
-    finally {
-      IOUtil.close(is);
     }
   }
 
