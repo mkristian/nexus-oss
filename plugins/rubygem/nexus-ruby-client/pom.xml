@@ -15,69 +15,44 @@
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+
   <modelVersion>4.0.0</modelVersion>
 
   <parent>
     <groupId>org.sonatype.nexus.plugins</groupId>
-    <artifactId>nexus-plugins</artifactId>
+    <artifactId>nexus-plugins-rubygem</artifactId>
     <version>2.11.0-SNAPSHOT</version>
   </parent>
 
-  <artifactId>nexus-plugins-rubygem</artifactId>
+  <artifactId>nexus-ruby-client</artifactId>
   <name>${project.groupId}:${project.artifactId}</name>
-  <packaging>pom</packaging>
+
+  <dependencies>
+    <dependency>
+      <groupId>org.sonatype.nexus</groupId>
+      <artifactId>nexus-client-core</artifactId>
+    </dependency>
+  </dependencies>
 
   <properties>
-    <jruby.version>1.7.12</jruby.version>
-    <jruby-plugins.version>1.0.1</jruby-plugins.version>
+    <!-- compiler plugin configuration, we are Java6 -->
+    <maven.compiler.source>1.6</maven.compiler.source>
+    <maven.compiler.target>1.6</maven.compiler.target>
   </properties>
-
-  <repositories>
-    <repository>
-      <id>rubygems-releases</id>
-      <url>http://rubygems-proxy.torquebox.org/releases</url>
-    </repository>
-  </repositories>
-
-  <dependencyManagement>
-    <dependencies>
-
-      <dependency>
-        <groupId>org.jruby</groupId>
-        <artifactId>jruby</artifactId>
-        <version>${jruby.version}</version>
-        <type>pom</type>
-      </dependency>
-
-      <dependency>
-        <groupId>rubygems</groupId>
-        <artifactId>maven-tools</artifactId>
-        <version>1.0.5</version>
-        <type>gem</type>
-      </dependency>
-
-    </dependencies>
-  </dependencyManagement>
-
-  <modules>
-    <module>nexus-ruby-client</module>
-    <module>nexus-ruby-tools</module>
-    <module>nexus-ruby-plugin</module>
-  </modules>
 
   <build>
     <pluginManagement>
       <plugins>
         <plugin>
-          <groupId>de.saumya.mojo</groupId>
-          <artifactId>gem-maven-plugin</artifactId>
-          <version>${jruby-plugins.version}</version>
-        </plugin>
-
-        <plugin>
-          <groupId>de.saumya.mojo</groupId>
-          <artifactId>minitest-maven-plugin</artifactId>
-          <version>${jruby-plugins.version}</version>
+          <groupId>org.codehaus.mojo</groupId>
+          <artifactId>animal-sniffer-maven-plugin</artifactId>
+          <configuration>
+            <signature>
+              <groupId>org.codehaus.mojo.signature</groupId>
+              <artifactId>java16</artifactId>
+              <version>1.1</version>
+            </signature>
+          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>
