@@ -10,6 +10,7 @@
  * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
+
 package org.sonatype.nexus.testsuite.ruby;
 
 import java.io.File;
@@ -21,9 +22,13 @@ import javax.inject.Inject;
 import org.sonatype.nexus.bundle.launcher.NexusBundleConfiguration;
 import org.sonatype.nexus.client.core.subsystem.content.Content;
 import org.sonatype.nexus.client.core.subsystem.content.Location;
+import org.sonatype.nexus.client.core.subsystem.repository.Repositories;
 import org.sonatype.nexus.client.rest.BaseUrl;
 import org.sonatype.nexus.ruby.BundleRunner;
 import org.sonatype.nexus.ruby.GemRunner;
+import org.sonatype.nexus.ruby.client.RubyGroupRepository;
+import org.sonatype.nexus.ruby.client.RubyHostedRepository;
+import org.sonatype.nexus.ruby.client.RubyProxyRepository;
 import org.sonatype.nexus.testsuite.support.NexusRunningITSupport;
 import org.sonatype.sisu.filetasks.FileTaskBuilder;
 
@@ -31,6 +36,7 @@ import org.hamcrest.Matcher;
 import org.jruby.embed.ScriptingContainer;
 import org.junit.runners.Parameterized.Parameters;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.sonatype.sisu.filetasks.builder.FileRef.file;
@@ -187,5 +193,31 @@ public abstract class RubyITSupport
     assertThat(gemRunner().list().toString(), containsString("nexus ("));
 
     return nexusGem;
+  }
+
+  // == Client
+
+  protected Content content() {
+    return client().getSubsystem(Content.class);
+  }
+
+  protected Repositories repositories() {
+    return client().getSubsystem(Repositories.class);
+  }
+
+  protected RubyHostedRepository createRubyHostedRepository(final String id) {
+    checkNotNull(id);
+    return repositories().create(RubyHostedRepository.class, id).withName(id).save();
+  }
+
+  protected RubyProxyRepository createRubyProxyRepository(final String id, final String url) {
+    checkNotNull(id);
+    checkNotNull(url);
+    return repositories().create(RubyProxyRepository.class, id).withName(id).asProxyOf(url).save();
+  }
+
+  protected RubyGroupRepository createRubyGroupRepository(final String id, final String... members) {
+    checkNotNull(id);
+    return repositories().create(RubyGroupRepository.class, id).withName(id).addMember(members).save();
   }
 }
