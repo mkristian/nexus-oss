@@ -14,12 +14,12 @@
 package org.sonatype.nexus.testsuite.ruby;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.Collection;
 
 import javax.inject.Inject;
 
 import org.sonatype.nexus.bundle.launcher.NexusBundleConfiguration;
+import org.sonatype.nexus.client.core.exception.NexusClientNotFoundException;
 import org.sonatype.nexus.client.core.subsystem.content.Content;
 import org.sonatype.nexus.client.core.subsystem.content.Location;
 import org.sonatype.nexus.client.core.subsystem.repository.Repositories;
@@ -29,37 +29,36 @@ import org.sonatype.nexus.ruby.GemRunner;
 import org.sonatype.nexus.ruby.client.RubyGroupRepository;
 import org.sonatype.nexus.ruby.client.RubyHostedRepository;
 import org.sonatype.nexus.ruby.client.RubyProxyRepository;
-import org.sonatype.nexus.testsuite.support.NexusRunningITSupport;
+import org.sonatype.nexus.testsuite.support.NexusRunningParametrizedITSupport;
+import org.sonatype.nexus.testsuite.support.NexusStartAndStopStrategy;
+import org.sonatype.nexus.testsuite.support.NexusStartAndStopStrategy.Strategy;
 import org.sonatype.sisu.filetasks.FileTaskBuilder;
 
 import org.hamcrest.Matcher;
 import org.jruby.embed.ScriptingContainer;
-import org.junit.runners.Parameterized.Parameters;
+import org.junit.Before;
+import org.junit.runners.Parameterized;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.sonatype.sisu.filetasks.builder.FileRef.file;
-import static org.sonatype.sisu.filetasks.builder.FileRef.path;
+import static org.sonatype.nexus.testsuite.support.ParametersLoaders.firstAvailableTestParameters;
+import static org.sonatype.nexus.testsuite.support.ParametersLoaders.systemTestParameters;
+import static org.sonatype.nexus.testsuite.support.ParametersLoaders.testParameters;
+import static org.sonatype.sisu.goodies.common.Varargs.$;
 
+@NexusStartAndStopStrategy(Strategy.EACH_TEST)
 public abstract class RubyITSupport
-    extends NexusRunningITSupport
+    extends NexusRunningParametrizedITSupport
 {
-  // FIXME: This configuration is only used presently by DownloadsOnEmptyRepositoriesIT
-  // FIXME: Looks like it was used for some others, but was commented out to use a sub-class to control config
-  // FIXME: Should consider normalizing like *all* other modern tests to use same params to control bundle here
-  // FIXME: ... and then remove use of injected-test.properties which is presently only used for these ruby tests
-
-  @Parameters
-  public static Collection<String[]> data() {
-    String[][] data = new String[][]{
-        {"gemshost"},
-        {"gemsproxy"},
-        {"gemshostgroup"},
-        {"gemsproxygroup"},
-        {"gemsgroup"}
-    };
-    return Arrays.asList(data);
+  @Parameterized.Parameters
+  public static Collection<Object[]> data() {
+    return firstAvailableTestParameters(
+        systemTestParameters(),
+        testParameters(
+            $("${it.nexus.bundle.groupId}:${it.nexus.bundle.artifactId}:zip:bundle")
+        )
+    ).load();
   }
 
   @Inject
@@ -69,18 +68,33 @@ public abstract class RubyITSupport
 
   protected ScriptingContainer ruby;
 
-  protected final String repoId;
-
   private BundleRunner bundleRunner;
 
-  public RubyITSupport(String nexusBundleCoordinates, String repoId) {
+  public RubyITSupport(final String nexusBundleCoordinates) {
     super(nexusBundleCoordinates);
-    this.repoId = repoId;
   }
 
-  public RubyITSupport(String repoId) {
-    this(null, repoId);
+  // ==
+
+  // TODO: this might be moved to some subclass. Current Ruby ITs did use almost same config, but it might change in future
+  @Before
+  public void before() {
+    try {
+      // ask for repo
+      repositories().get("gemshost");
+    }
+    catch (NexusClientNotFoundException e) {
+      // create these ONLY if not exists on remote
+      // as on test classes with multiple test methods @Before will be called multiple time while NX started only once
+      final RubyHostedRepository gemshost = createRubyHostedRepository("gemshost");
+      final RubyProxyRepository gemsproxy = createRubyProxyRepository("gemsproxy", gemshost.contentUri());
+      createRubyGroupRepository("gemshostgroup", gemshost.id());
+      createRubyGroupRepository("gemsproxygroup", gemsproxy.id());
+      createRubyGroupRepository("gemsgroup", gemshost.id(), gemsproxy.id());
+    }
   }
+
+  // ==
 
   private ScriptingContainer ruby() {
     if (this.ruby == null) {
@@ -116,11 +130,11 @@ public abstract class RubyITSupport
     return new BundleRunner(ruby());
   }
 
-  protected File assertFileDownload(String name, Matcher<Boolean> matcher) {
+  protected File assertFileDownload(String repoId, String name, Matcher<Boolean> matcher) {
     File target = new File(util.createTempDir(), "null");
 
     try {
-      client().getSubsystem(Content.class).download(new Location(repoId, name), target);
+      content().download(new Location(repoId, name), target);
     }
     catch (Exception e) {
       // just ignore it and let matcher test
@@ -133,19 +147,15 @@ public abstract class RubyITSupport
     return target;
   }
 
-  protected void assertFileRemoval(String name, Matcher<Boolean> matcher) {
+  protected void assertFileRemoval(String repoId, String name, Matcher<Boolean> matcher) {
     try {
-      client().getSubsystem(Content.class).delete(new Location(repoId, name));
+      content().delete(new Location(repoId, name));
       assertThat(name, true, matcher);
     }
     catch (Exception e) {
       // just ignore it and let matcher test
       assertThat(name, false, matcher);
     }
-  }
-
-  protected String nexusXML() {
-    return "nexus-" + repoId + ".xml";
   }
 
   @Override
@@ -158,12 +168,7 @@ public abstract class RubyITSupport
                 "org.sonatype.nexus.plugins", "nexus-ruby-plugin"
             )
         )
-        .addOverlays(
-            overlays.copy()
-                .file(file(testData().resolveFile(nexusXML())))
-                .to().file(path("sonatype-work/nexus/conf/nexus.xml"))
-        )
-        .setPort(4711);
+        .setPort(4711); // TODO: remove static port
   }
 
   protected File installLatestNexusGem() {
@@ -171,7 +176,6 @@ public abstract class RubyITSupport
   }
 
   protected File installLatestNexusGem(boolean withBundler) {
-
     //nexus gem
     File nexusGem;
     try {

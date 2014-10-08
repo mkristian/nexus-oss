@@ -10,13 +10,13 @@
  * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
+
 package org.sonatype.nexus.testsuite.ruby;
 
 import java.io.File;
 import java.io.IOException;
 
 import org.sonatype.nexus.bundle.launcher.NexusBundleConfiguration;
-import org.sonatype.nexus.testsuite.support.NexusStartAndStopStrategy;
 
 import org.junit.Assert;
 import org.junit.Test;
@@ -26,21 +26,21 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
+import static org.sonatype.nexus.client.core.condition.NexusStatusConditions.any27AndLater;
 import static org.sonatype.nexus.testsuite.ruby.TestUtils.lastLine;
 import static org.sonatype.sisu.filetasks.builder.FileRef.file;
 import static org.sonatype.sisu.filetasks.builder.FileRef.path;
 
-@NexusStartAndStopStrategy(NexusStartAndStopStrategy.Strategy.EACH_METHOD)
-//running 3 or more tests in one go produces Errno::EBADF: Bad file descriptor - Bad file descriptor
-//so run each test in its own forked jvm :(
-//@RunWith(value = Parameterized.class)
-public class BundleITSupport
+public abstract class BundleITSupport
     extends RubyITSupport
 {
   private File target;
 
-  public BundleITSupport(String repoId) {
-    super(repoId);
+  private String repoId;
+
+  public BundleITSupport(final String nexusBundleCoordinates, final String repoId) {
+    super(nexusBundleCoordinates);
+    this.repoId = repoId;
   }
 
   @Override
@@ -54,7 +54,8 @@ public class BundleITSupport
     installLatestNexusGem(true);
 
     assertThat(bundleRunner().config(), containsString("mirror.http://rubygems.org"));
-    assertThat(bundleRunner().config(), containsString("http://localhost:4711/nexus/content/repositories/" + repoId));
+    assertThat(bundleRunner().config(),
+        containsString("http://localhost:" + nexus().getPort() + "/nexus/content/repositories/" + repoId));
 
     String out = bundleRunner().install();
 
@@ -73,7 +74,7 @@ public class BundleITSupport
   }
 
   protected File assertFileDownload(String name, Integer len) throws IOException {
-    File f = assertFileDownload(name, is(len != null));
+    File f = assertFileDownload(repoId, name, is(len != null));
     if (f != null) {
       assertThat((int) f.length(), equalTo(len));
     }
@@ -90,10 +91,10 @@ public class BundleITSupport
     assertFileDownload("/api/v1/dependencies/zip.json.rz", 80);
     assertFileDownload("/api/v1/dependencies?gems=zip", 80);
     // bundler uses this to check existence of the api/v1
-    assertFileDownload("/api/v1/dependencies", is(true));
+    assertFileDownload(repoId, "/api/v1/dependencies", is(true));
     assertFileDownload("/quick/Marshal.4.8/z/zip-2.0.2.gemspec.rz", 359);
     assertFileDownload("/quick/Marshal.4.8/zip-2.0.2.gemspec.rz", 359);
-    if (!client().getNexusStatus().getVersion().matches("^2\\.6\\..*")) {
+    if (any27AndLater().isSatisfiedBy(client().getNexusStatus())) {
       // skip this test for 2.6.x nexus :
       // something goes wrong and this feature is undocumented and not complete
       assertFileDownload("/maven/releases/rubygems/zip/maven-metadata.xml", 223);

@@ -17,8 +17,8 @@ import java.io.IOException;
 public class GroupedBundleIT
     extends BundleITSupport
 {
-  public GroupedBundleIT() {
-    super("gemsgroup");
+  public GroupedBundleIT(final String nexusBundleCoordinates) {
+    super(nexusBundleCoordinates, "gemsgroup");
   }
 
   @Override
