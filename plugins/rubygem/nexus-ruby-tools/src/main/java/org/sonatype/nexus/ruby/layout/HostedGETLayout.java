@@ -14,10 +14,10 @@ package org.sonatype.nexus.ruby.layout;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.LinkedList;
 import java.util.List;
 
 import org.sonatype.nexus.ruby.DependencyFile;
+import org.sonatype.nexus.ruby.DependencyHelper;
 import org.sonatype.nexus.ruby.GemFile;
 import org.sonatype.nexus.ruby.GemspecFile;
 import org.sonatype.nexus.ruby.IOUtil;
@@ -117,7 +117,6 @@ public class HostedGETLayout
    * create the <code>DependencyFile</code> for the given gem name
    */
   protected void createDependency(DependencyFile file) {
-    List<InputStream> gemspecs = new LinkedList<InputStream>();
     try {
       SpecsIndexFile specs = specsIndexFile(SpecsIndexType.RELEASE);
       store.retrieve(specs);
@@ -131,26 +130,22 @@ public class HostedGETLayout
         versions.addAll(gateway.listAllVersions(file.name(), is, store.getModified(specs), true));
       }
 
+      DependencyHelper gemspecs = gateway.newDependencyHelper();
       for (String version : versions) {
         // ruby platform is not part of the gemname
         GemspecFile gemspec = gemspecFile(file.name() + "-" + version.replaceFirst("-ruby$", ""));
-        gemspecs.add(store.getInputStream(gemspec));
+        try (InputStream is = store.getInputStream(gemspec)) {
+          gemspecs.addGemspec(is);
+        }
       }
 
-      try (InputStream is = gateway.createDependencies(gemspecs)) {
-        // just update in case so no need to deal with concurrency
-        // since once the file is there no update happen again
+      try (InputStream is = gemspecs.getInputStream(false)) {
         store.update(is, file);
       }
       store.retrieve(file);
     }
     catch (IOException e) {
       file.setException(e);
-    }
-    finally {
-      for(InputStream is: gemspecs) {
-        IOUtil.close(is);
-      }
     }
   }
 }

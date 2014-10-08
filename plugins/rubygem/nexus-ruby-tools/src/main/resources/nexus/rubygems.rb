@@ -2,9 +2,14 @@ require 'maven/tools/pom'
 require 'json'
 require 'nexus/indexer'
 require 'nexus/dependencies'
+require 'nexus/dependency_helper_impl'
 
 module Nexus
   class Rubygems
+
+    def new_dependency_helper
+      Nexus::DependencyHelperImpl.new
+    end
 
     def recreate_rubygems_index( directory )
       indexer = Nexus::Indexer.new( directory )
@@ -128,65 +133,6 @@ module Nexus
       EVAL
 
     end
-
-    def split_dependencies( deps )
-      map = {}
-      data = Marshal.load( read_binary( deps ) )
-      data.each do |d|
-        bucket = map[ d[:name] ] ||= []
-        bucket << d
-      end
-      result = {}
-      map.each do |k,v|
-        result[ k ] = Marshal.dump( v ).bytes.to_a
-      end
-      result
-    end
-
-    def merge_dependencies( unique, *deps )
-      result = []
-      deps.each do |dep|
-        result += Marshal.load( read_binary( dep ) )
-      end
-      if unique
-        result.uniq! { |n| "#{n[:name]}-#{n[:number]}-#{n[:platform]}" }
-      end
-      Marshal.dump( result ).bytes.to_a
-    end
-
-    def create_dependencies( *gemspecs )
-      result = []
-      gemspecs.each do |gemspec|
-        spec = Marshal.load( Gem.inflate( read_binary( gemspec ) ) )
-        result << dependency_data( spec.name, 
-                                   spec.version.to_s,
-                                   spec.platform.to_s, 
-                                   deps_from( spec ) )
-      end
-      Marshal.dump( result ).bytes.to_a
-    end
-
-    def deps_from( spec )
-      spec.runtime_dependencies.collect do |d|
-        # issue https://github.com/sonatype/nexus-ruby-support/issues/25
-        name = case d.name
-               when Array
-                 d.name.first
-               else
-                 d.name
-               end
-        [ name, d.requirement.to_s ]
-      end
-    end
-    private :deps_from
-
-    def dependency_data( gemname, number, platform, deps )
-      { :name => gemname,
-        :number => number,
-        :platform => platform,
-        :dependencies => deps }
-    end
-    private :dependency_data
 
     def dependencies( name, file )
       data = Marshal.load( read_binary( file ) )

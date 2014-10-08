@@ -264,7 +264,7 @@ public class HostedDELETELayoutTest
   @Test
   public void testBundlerApi() throws Exception {
     String[] pathes = {"/api/v1/dependencies?gems=zip,pre"};
-    assertFiletypeWithPayload(pathes, FileType.BUNDLER_API, org.sonatype.nexus.ruby.ByteArrayInputStream.class);
+    assertFiletypeWithPayload(pathes, FileType.BUNDLER_API, ByteArrayInputStream.class);
   }
 
   @Test

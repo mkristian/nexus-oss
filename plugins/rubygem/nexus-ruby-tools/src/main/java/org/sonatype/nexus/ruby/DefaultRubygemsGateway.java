@@ -13,9 +13,7 @@
 package org.sonatype.nexus.ruby;
 
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.jruby.embed.PathType;
 import org.jruby.embed.ScriptingContainer;
@@ -52,6 +50,11 @@ public class DefaultRubygemsGateway
   protected Object newScript() {
     IRubyObject nexusRubygemsClass = scriptingContainer.parse(PathType.CLASSPATH, "nexus/rubygems.rb").run();
     return scriptingContainer.callMethod(nexusRubygemsClass, "new", Object.class);
+  }
+
+  @Override
+  public DependencyHelper newDependencyHelper() {
+    return callMethod("new_dependency_helper", DependencyHelper.class);
   }
 
   @Override
@@ -119,54 +122,6 @@ public class DefaultRubygemsGateway
             latest
         },
         List.class);
-
-    return array == null ? null : new ByteArrayInputStream(array);
-  }
-
-  @Override
-  public Map<String, InputStream> splitDependencies(InputStream deps) {
-    @SuppressWarnings("unchecked")
-    Map<String, List<Long>> map = (Map<String, List<Long>>) callMethod("split_dependencies",
-        deps,
-        Map.class);
-
-    Map<String, InputStream> result = new HashMap<>();
-    for (Map.Entry<String, List<Long>> entry : map.entrySet()) {
-      result.put(entry.getKey(), new ByteArrayInputStream(entry.getValue()));
-    }
-    return result;
-  }
-
-  @Override
-  public InputStream mergeDependencies(List<InputStream> deps) {
-    return mergeDependencies(deps, false);
-  }
-
-  @Override
-  public InputStream mergeDependencies(List<InputStream> deps, boolean unique) {
-    Object[] args = new Object[deps.size() + 1];
-    args[0] = unique;
-    int index = 1;
-    for (InputStream is : deps) {
-      args[index++] = is;
-    }
-    @SuppressWarnings("unchecked")
-    List<Long> array = (List<Long>) callMethod("merge_dependencies",
-        args,
-        List.class);
-
-    return array == null ? null : new ByteArrayInputStream(array);
-  }
-
-  @Override
-  public InputStream createDependencies(List<InputStream> gemspecs) {
-    @SuppressWarnings("unchecked")
-    List<Long> array = (List<Long>) (gemspecs.size() == 0 ?
-        callMethod("create_dependencies",
-            List.class) :
-        callMethod("create_dependencies",
-            gemspecs.toArray(),
-            List.class));
 
     return array == null ? null : new ByteArrayInputStream(array);
   }
