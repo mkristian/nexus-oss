@@ -10,16 +10,11 @@
  * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
-package org.sonatype.nexus.testsuite.ruby;
+package org.sonatype.nexus.ruby.client;
 
-public class GroupedGemLifecycleIT
-    extends GemLifecycleITSupport
+import org.sonatype.nexus.client.core.subsystem.repository.ProxyRepository;
+
+public interface RubyProxyRepository
+    extends ProxyRepository<RubyProxyRepository>
 {
-  public GroupedGemLifecycleIT(final String nexusBundleCoordinates) {
-    super(nexusBundleCoordinates, "gemsgroup");
-  }
-
-  void moreAsserts(String gemName, String gemspecName, String dependencyName) {
-    // TODO
-  }
 }

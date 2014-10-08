@@ -15,8 +15,8 @@ package org.sonatype.nexus.testsuite.ruby;
 public class HostedGroupGemLifecycleIT
     extends GemLifecycleITSupport
 {
-  public HostedGroupGemLifecycleIT() {
-    super("gemshostgroup");
+  public HostedGroupGemLifecycleIT(final String nexusBundleCoordinates) {
+    super(nexusBundleCoordinates, "gemshostgroup");
   }
 
   void moreAsserts(String gemName, String gemspecName, String dependencyName) {

@@ -10,11 +10,10 @@
  * of Sonatype, Inc. Apache Maven is a trademark of the Apache Software Foundation. M2eclipse is a trademark of the
  * Eclipse Foundation. All other trademarks are the property of their respective owners.
  */
+
 package org.sonatype.nexus.testsuite.ruby;
 
 import java.io.File;
-
-import org.sonatype.nexus.testsuite.support.NexusStartAndStopStrategy;
 
 import org.junit.Test;
 
@@ -26,16 +25,14 @@ import static org.hamcrest.Matchers.is;
 import static org.sonatype.nexus.testsuite.ruby.TestUtils.lastLine;
 import static org.sonatype.nexus.testsuite.ruby.TestUtils.numberOfLines;
 
-@NexusStartAndStopStrategy(NexusStartAndStopStrategy.Strategy.EACH_TEST)
-// running 3 or more tests in one go produces Errno::EBADF: Bad file descriptor - Bad file descriptor
-// so run each test in its own forked jvm :(
-//@RunWith(value = Parameterized.class)
 public abstract class GemLifecycleITSupport
     extends RubyITSupport
 {
+  protected String repoId;
 
-  public GemLifecycleITSupport(String repoId) {
-    super(repoId);
+  public GemLifecycleITSupport(final String nexusBundleCoordinates, final String repoId) {
+    super(nexusBundleCoordinates);
+    this.repoId = repoId;
   }
 
   @Test
@@ -57,17 +54,17 @@ public abstract class GemLifecycleITSupport
         nexusGem.getName().replaceFirst("-.*$", ".json.rz");
 
     // make sure our gem is not on the repository
-    assertFileDownload(gemName, is(false));
-    assertFileDownload(gemspecName, is(false));
+    assertFileDownload(repoId, gemName, is(false));
+    assertFileDownload(repoId, gemspecName, is(false));
 
     // upload gem to gemshost - repoId is hardcoded into config-file
     File config = testData().resolveFile(".gem/nexus");
     assertThat(lastLine(gemRunner().nexus(config, nexusGem)), equalTo("Created"));
     assertThat(lastLine(gemRunner().nexus(config, nexusGem)), endsWith("not allowed"));
 
-    assertFileDownload(gemName, is(true));
-    assertFileDownload(gemspecName, is(true));
-    assertFileDownload(dependencyName, is(true));
+    assertFileDownload(repoId, gemName, is(true));
+    assertFileDownload(repoId, gemspecName, is(true));
+    assertFileDownload(repoId, dependencyName, is(true));
 
     // now we have one remote gem
     assertThat(numberOfLines(gemRunner().list(repoId)), is(numberOfInstalledGems));
@@ -84,11 +81,11 @@ public abstract class GemLifecycleITSupport
     winGem = testData().resolveFile("win-2-x86-mswin32-60.gem");
     assertThat(lastLine(gemRunner().nexus(config, winGem)), equalTo("Created"));
 
-    assertFileDownload("gems/" + winGem.getName(),
+    assertFileDownload(repoId, "gems/" + winGem.getName(),
         is(true));
-    assertFileDownload("quick/Marshal.4.8/" + winGem.getName() + "spec.rz",
+    assertFileDownload(repoId, "quick/Marshal.4.8/" + winGem.getName() + "spec.rz",
         is(true));
-    assertFileDownload("api/v1/dependencies/" + winGem.getName().replaceFirst("-.*$", ".json.rz"),
+    assertFileDownload(repoId, "api/v1/dependencies/" + winGem.getName().replaceFirst("-.*$", ".json.rz"),
         is(true));
   }
 
@@ -96,19 +93,19 @@ public abstract class GemLifecycleITSupport
 
   void deleteHostedFiles(String gemName, String gemspecName, String dependencyName) {
     // can not delete gemspec files
-    assertFileRemoval(gemspecName, is(false));
+    assertFileRemoval(repoId, gemspecName, is(false));
 
-    assertFileDownload(gemName, is(true));
-    assertFileDownload(gemspecName, is(true));
-    assertFileDownload(dependencyName, is(true));
+    assertFileDownload(repoId, gemName, is(true));
+    assertFileDownload(repoId, gemspecName, is(true));
+    assertFileDownload(repoId, dependencyName, is(true));
 
     // can delete gem files which also deletes the associated files
-    assertFileRemoval(gemName, is(true));
+    assertFileRemoval(repoId, gemName, is(true));
 
-    assertFileDownload(gemName, is(false));
-    assertFileDownload(gemspecName, is(false));
+    assertFileDownload(repoId, gemName, is(false));
+    assertFileDownload(repoId, gemspecName, is(false));
     // the dependency files exist also for none-existing gems
-    assertFileDownload(dependencyName, is(true));
+    assertFileDownload(repoId, dependencyName, is(true));
 
     // TODO specs index files
   }
@@ -118,19 +115,19 @@ public abstract class GemLifecycleITSupport
     gemspecName = gemspecName.replace("nexus", "n/nexus");
 
     // can delete any file
-    assertFileRemoval(gemspecName, is(true));
-    assertFileRemoval(gemspecName, is(false));
+    assertFileRemoval(repoId, gemspecName, is(true));
+    assertFileRemoval(repoId, gemspecName, is(false));
 
-    assertFileRemoval(gemName, is(true));
-    assertFileRemoval(gemName, is(false));
+    assertFileRemoval(repoId, gemName, is(true));
+    assertFileRemoval(repoId, gemName, is(false));
 
-    assertFileRemoval(dependencyName, is(true));
-    assertFileRemoval(dependencyName, is(false));
+    assertFileRemoval(repoId, dependencyName, is(true));
+    assertFileRemoval(repoId, dependencyName, is(false));
 
     // after delete the file will be fetched from the source again
-    assertFileDownload(gemName, is(true));
-    assertFileDownload(gemspecName, is(true));
-    assertFileDownload(dependencyName, is(true));
+    assertFileDownload(repoId, gemName, is(true));
+    assertFileDownload(repoId, gemspecName, is(true));
+    assertFileDownload(repoId, dependencyName, is(true));
 
     // TODO specs index files
   }

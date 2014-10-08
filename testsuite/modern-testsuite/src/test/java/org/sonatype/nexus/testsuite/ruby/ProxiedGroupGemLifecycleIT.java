@@ -15,8 +15,8 @@ package org.sonatype.nexus.testsuite.ruby;
 public class ProxiedGroupGemLifecycleIT
     extends GemLifecycleITSupport
 {
-  public ProxiedGroupGemLifecycleIT() {
-    super("gemsproxygroup");
+  public ProxiedGroupGemLifecycleIT(final String nexusBundleCoordinates) {
+    super(nexusBundleCoordinates, "gemsproxygroup");
   }
 
   void moreAsserts(String gemName, String gemspecName, String dependencyName) {
