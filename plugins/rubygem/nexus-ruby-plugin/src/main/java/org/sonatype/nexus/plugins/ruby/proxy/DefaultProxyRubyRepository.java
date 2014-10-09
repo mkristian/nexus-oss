@@ -177,7 +177,7 @@ public class DefaultProxyRubyRepository
   @SuppressWarnings("deprecation")
   @Override
   protected AbstractStorageItem doRetrieveRemoteItem(ResourceStoreRequest request)
-      throws ItemNotFoundException, RemoteAccessException, org.sonatype.nexus.proxy.StorageException
+      throws ItemNotFoundException, org.sonatype.nexus.proxy.StorageException
   {
     RubygemsFile file = facade.file(request.getRequestPath());
 
@@ -252,7 +252,7 @@ public class DefaultProxyRubyRepository
     gateway.purgeBrokenGemspecFiles(directory);
   }
 
-  private String getBaseDirectory() throws ItemNotFoundException, LocalStorageException {
+  private String getBaseDirectory() {
     String basedir = this.getLocalUrl().replace("file:", "");
     if (log.isDebugEnabled()) {
       log.debug("recreate rubygems metadata in {}", basedir);

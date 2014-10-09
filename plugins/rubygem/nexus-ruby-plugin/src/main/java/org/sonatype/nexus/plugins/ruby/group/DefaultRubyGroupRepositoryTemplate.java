@@ -32,11 +32,6 @@ public class DefaultRubyGroupRepositoryTemplate
     super(provider, id, description, new RubyContentClass(), RubyGroupRepository.class);
   }
 
-  public DefaultRubyGroupRepositoryConfiguration getExternalConfiguration(boolean forWrite) {
-    return (DefaultRubyGroupRepositoryConfiguration) getCoreConfiguration().getExternalConfiguration()
-        .getConfiguration(forWrite);
-  }
-
   @Override
   protected CRepositoryCoreConfiguration initCoreConfiguration() {
     CRepository repo = new DefaultCRepository();

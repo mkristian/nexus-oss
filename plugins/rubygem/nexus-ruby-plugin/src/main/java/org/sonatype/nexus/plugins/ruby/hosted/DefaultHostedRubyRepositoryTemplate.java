@@ -31,11 +31,6 @@ public class DefaultHostedRubyRepositoryTemplate
     super(provider, id, description, new RubyContentClass(), HostedRubyRepository.class);
   }
 
-  public DefaultHostedRubyRepositoryConfiguration getExternalConfiguration(boolean forWrite) {
-    return (DefaultHostedRubyRepositoryConfiguration) getCoreConfiguration().getExternalConfiguration()
-        .getConfiguration(forWrite);
-  }
-
   @Override
   protected CRepositoryCoreConfiguration initCoreConfiguration() {
     CRepository repo = new DefaultCRepository();

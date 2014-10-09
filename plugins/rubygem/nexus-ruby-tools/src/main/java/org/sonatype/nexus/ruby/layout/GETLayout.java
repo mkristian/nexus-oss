@@ -277,11 +277,6 @@ public class GETLayout
     return sha;
   }
 
-  @Deprecated
-  protected DependencyData newDependencies(DependencyFile file) throws IOException {
-    return newDependencyData(file);
-  }
-
   /**
    * load all the dependency data into an object.
    */

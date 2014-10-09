@@ -32,11 +32,6 @@ public class DefaultProxyRubyRepositoryTemplate
     super(provider, id, description, new RubyContentClass(), ProxyRubyRepository.class);
   }
 
-  public DefaultProxyRubyRepositoryConfiguration getExternalConfiguration(boolean forWrite) {
-    return (DefaultProxyRubyRepositoryConfiguration) getCoreConfiguration().getExternalConfiguration()
-        .getConfiguration(forWrite);
-  }
-
   @Override
   protected CRepositoryCoreConfiguration initCoreConfiguration() {
     CRepository repo = new DefaultCRepository();

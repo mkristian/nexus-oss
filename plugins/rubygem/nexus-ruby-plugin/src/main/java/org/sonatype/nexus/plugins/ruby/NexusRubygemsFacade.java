@@ -106,7 +106,7 @@ public class NexusRubygemsFacade
           throw (org.sonatype.nexus.proxy.StorageException) e;
         }
         if (e instanceof IOException) {
-          throw new org.sonatype.nexus.proxy.StorageException((IOException) e);
+          throw new org.sonatype.nexus.proxy.StorageException(e);
         }
         throw new RuntimeException(e);
       case PAYLOAD:
@@ -131,7 +131,7 @@ public class NexusRubygemsFacade
       case ERROR:
         Exception e = file.getException();
         if (e instanceof UnsupportedStorageOperationException) {
-          throw new UnsupportedStorageOperationException(file.storagePath());
+          throw (UnsupportedStorageOperationException) e;
         }
       default:
         return handleCommon(repository, file);

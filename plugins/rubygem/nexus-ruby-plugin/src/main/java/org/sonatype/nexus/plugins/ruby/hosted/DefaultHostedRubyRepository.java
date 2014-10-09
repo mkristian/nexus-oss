@@ -172,7 +172,7 @@ public class DefaultHostedRubyRepository
     gateway.purgeBrokenDepencencyFiles(directory);
   }
 
-  protected String getBaseDirectory() throws ItemNotFoundException, LocalStorageException {
+  protected String getBaseDirectory() throws LocalStorageException {
     // TODO use getApplicationConfiguration().getWorkingDirectory()
     return this.getLocalUrl().replace("file:", "");
   }
