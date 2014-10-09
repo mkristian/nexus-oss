@@ -13,11 +13,13 @@
 package org.sonatype.nexus.plugins.ruby;
 
 import javax.inject.Named;
+import javax.inject.Singleton;
 
 import org.sonatype.nexus.ruby.DefaultRubygemsGateway;
 
 // just make a "component" out of the DefaultRubygemsGateway
 @Named
+@Singleton
 public class NexusRubygemsGateway
     extends DefaultRubygemsGateway
 {
