@@ -14,7 +14,6 @@ package org.sonatype.nexus.ruby;
 
 import java.io.InputStream;
 import java.util.List;
-import java.util.Map;
 
 public interface RubygemsGateway
 {
@@ -40,14 +39,6 @@ public interface RubygemsGateway
 
   InputStream mergeSpecs(List<InputStream> streams, boolean latest);
 
-  Map<String, InputStream> splitDependencies(InputStream bundlerResult);
-
-  InputStream mergeDependencies(List<InputStream> deps);
-
-  InputStream mergeDependencies(List<InputStream> deps, boolean unique);
-
-  InputStream createDependencies(List<InputStream> gemspecs);
-
   String filename(Object spec);
 
   String name(Object spec);
@@ -55,4 +46,10 @@ public interface RubygemsGateway
   DependencyData dependencies(InputStream inputStream, String name, long modified);
 
   List<String> listAllVersions(String name, InputStream inputStream, long modified, boolean prerelease);
+
+  /**
+   * create a new instance of <code>DependencyHelper</code>
+   * @return an empty DependencyHelper
+   */
+  DependencyHelper newDependencyHelper();
 }

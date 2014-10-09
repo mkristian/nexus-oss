@@ -16,18 +16,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.LinkedList;
-import java.util.List;
 
 import org.sonatype.nexus.ruby.ApiV1File;
 import org.sonatype.nexus.ruby.BundlerApiFile;
 import org.sonatype.nexus.ruby.DependencyData;
 import org.sonatype.nexus.ruby.DependencyFile;
+import org.sonatype.nexus.ruby.DependencyHelper;
 import org.sonatype.nexus.ruby.GemArtifactFile;
 import org.sonatype.nexus.ruby.GemArtifactIdDirectory;
 import org.sonatype.nexus.ruby.GemFile;
 import org.sonatype.nexus.ruby.GemspecFile;
-import org.sonatype.nexus.ruby.IOUtil;
 import org.sonatype.nexus.ruby.MavenMetadataFile;
 import org.sonatype.nexus.ruby.MavenMetadataSnapshotFile;
 import org.sonatype.nexus.ruby.MetadataBuilder;
@@ -98,7 +96,7 @@ public class GETLayout
    * @param deps the result set of <code>InputStream<code>s to all the <code>DependencyFile</code> of the
    *             given list of gem-names
    */
-  protected void retrieveAll(BundlerApiFile file, List<InputStream> deps) throws IOException {
+  protected void retrieveAll(BundlerApiFile file, DependencyHelper deps) throws IOException {
     for (String name : file.gemnames()) {
       deps.add(store.getInputStream(dependencyFile(name)));
     }
@@ -108,21 +106,15 @@ public class GETLayout
   public BundlerApiFile bundlerApiFile(String namesCommaSeparated) {
     BundlerApiFile file = super.bundlerApiFile(namesCommaSeparated);
 
-    // TODO change gateway to be able to use one InputStream after the other
-    List<InputStream> deps = new LinkedList<>();
+    DependencyHelper deps = gateway.newDependencyHelper();
     try {
       retrieveAll(file, deps);
       if (!file.hasException()) {
-        store.memory(gateway.mergeDependencies(deps), file);
+        store.memory(deps.getInputStream(false), file);
       }
     }
     catch (IOException e) {
       file.setException(e);
-    }
-    finally {
-      for (InputStream is : deps) {
-        IOUtil.close(is);
-      }
     }
     return file;
   }

@@ -37,6 +37,7 @@ import org.sonatype.nexus.proxy.repository.GroupItemNotFoundException;
 import org.sonatype.nexus.proxy.storage.UnsupportedStorageOperationException;
 import org.sonatype.nexus.ruby.BundlerApiFile;
 import org.sonatype.nexus.ruby.DependencyFile;
+import org.sonatype.nexus.ruby.DependencyHelper;
 import org.sonatype.nexus.ruby.RubygemsFile;
 import org.sonatype.nexus.ruby.RubygemsGateway;
 import org.sonatype.nexus.ruby.SpecsIndexType;
@@ -178,30 +179,22 @@ public class GroupNexusStorage
   private StorageItem merge(DependencyFile file, List<StorageItem> dependencies)
       throws UnsupportedStorageOperationException, IllegalOperationException, IOException
   {
-    List<InputStream> streams = new LinkedList<InputStream>();
-    InputStream content = null;
-    try {
-      for (StorageItem item : dependencies) {
-        streams.add(((StorageFileItem) item).getInputStream());
+    DependencyHelper deps = gateway.newDependencyHelper();
+    for (StorageItem item : dependencies) {
+      try (InputStream is = ((StorageFileItem) item).getInputStream()) {
+        deps.add(is);
       }
-      content = gateway.mergeDependencies(streams, true);
-      ContentLocator cl = new PreparedContentLocator(content,
-          file.type().mime(),
-          PreparedContentLocator.UNKNOWN_LENGTH);
+    }
+    ContentLocator cl = new PreparedContentLocator(deps.getInputStream(true),
+        file.type().mime(),
+        PreparedContentLocator.UNKNOWN_LENGTH);
 
-      DefaultStorageFileItem item =
-          new DefaultStorageFileItem(repository,
-              new ResourceStoreRequest(file.storagePath()),
-              true, true, cl);
-      repository.storeItem(false, item);
-      return item;
-    }
-    finally {
-      IOUtil.close(content);
-      for (InputStream is : streams) {
-        IOUtil.close(is);
-      }
-    }
+    DefaultStorageFileItem item =
+        new DefaultStorageFileItem(repository,
+            new ResourceStoreRequest(file.storagePath()),
+            true, true, cl);
+    repository.storeItem(false, item);
+    return item;
   }
 
   @Override

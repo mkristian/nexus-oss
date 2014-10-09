@@ -16,10 +16,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import org.sonatype.nexus.ruby.BundlerApiFile;
 import org.sonatype.nexus.ruby.DependencyFile;
+import org.sonatype.nexus.ruby.DependencyHelper;
 import org.sonatype.nexus.ruby.RubygemsGateway;
 
 public class ProxiedGETLayout
@@ -40,7 +40,7 @@ public class ProxiedGETLayout
   }
 
   @Override
-  protected void retrieveAll(BundlerApiFile file, List<InputStream> deps) throws IOException {
+  protected void retrieveAll(BundlerApiFile file, DependencyHelper deps) throws IOException {
     List<String> expiredNames = new LinkedList<>();
     for (String name : file.gemnames()) {
       DependencyFile dep = super.dependencyFile(name);
@@ -49,7 +49,9 @@ public class ProxiedGETLayout
       }
       else {
         store.retrieve(dep);
-        deps.add(store.getInputStream(dep));
+        try (InputStream is = store.getInputStream(dep)) {
+          deps.add(is);
+        }
       }
     }
     if (expiredNames.size() > 0) {
@@ -59,12 +61,17 @@ public class ProxiedGETLayout
         file.setException(expired.getException());
       }
       else if (expired.hasPayload()) {
+        DependencyHelper bundlerDeps = gateway.newDependencyHelper();
         try (InputStream bundlerResult = store.getInputStream(expired)) {
-          Map<String, InputStream> result = gateway.splitDependencies(bundlerResult);
-          for (Map.Entry<String, InputStream> entry : result.entrySet()) {
-            DependencyFile dep = super.dependencyFile(entry.getKey());
-            store.update(entry.getValue(), dep);
-            deps.add(store.getInputStream(dep));
+          bundlerDeps.add(bundlerResult);
+        }
+        for(String gemname: bundlerDeps.getGemnames()) {
+          DependencyFile dep = super.dependencyFile(gemname);
+          // first store the data for caching
+          store.update(bundlerDeps.getInputStreamOf(gemname), dep);
+          // then add it to collector
+          try (InputStream is = store.getInputStream(dep)) {
+            deps.add(is);
           }
         }
       }
@@ -73,7 +80,9 @@ public class ProxiedGETLayout
         for (String name : expiredNames) {
           DependencyFile dep = super.dependencyFile(name);
           store.retrieve(dep);
-          deps.add(store.getInputStream(dep));
+          try (InputStream is = store.getInputStream(dep)) {
+            deps.add(is);
+          }
         }
       }
     }

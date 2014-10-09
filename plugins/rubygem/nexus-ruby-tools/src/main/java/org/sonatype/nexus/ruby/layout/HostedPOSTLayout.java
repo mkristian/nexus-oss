@@ -79,8 +79,9 @@ public class HostedPOSTLayout
           }
           break;
         case API_V1:
-          store.create(store.getInputStream(file),
-              ((ApiV1File) file).gem(filename));
+          try (InputStream is = store.getInputStream(file)) {
+            store.create(is, ((ApiV1File) file).gem(filename));
+          }
           store.delete(file);
           break;
         default:

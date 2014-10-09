@@ -17,7 +17,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.sonatype.sisu.litmus.testsupport.TestSupport;
@@ -116,7 +115,9 @@ public class RubygemsGatewayTest
   public void testEmptyDependencies() throws Exception {
     File empty = new File("target/empty");
 
-    dumpStream(gateway.createDependencies(new ArrayList<InputStream>()), empty);
+    // create empty dependencies file
+    DependencyHelper deps = gateway.newDependencyHelper();
+    dumpStream(deps.getInputStream(false), empty);
 
     int size = scriptingContainer.callMethod(check,
         "specs_size",
