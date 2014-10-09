@@ -38,12 +38,12 @@ public class HostedGemLifecycleIT
   @Test
   public void uploadGemWithPushCommand() throws Exception {
     // make sure the credentials file has the right permissions otherwise the push command fails silently
-    Files.setPosixFilePermissions(testData().resolveFile(".gem/credentials").toPath(),
+    Files.setPosixFilePermissions(new File(getBundleTargetDirectory(), ".gem/credentials").toPath(),
         PosixFilePermissions.fromString("rw-------"));
 
     File gem = testData().resolveFile("pre-0.1.0.beta.gem");
     assertThat(lastLine(gemRunner().push(repoId, gem)),
-        equalTo("Pushing gem to http://127.0.0.1:4711/nexus/content/repositories/gemshost..."));
+        equalTo("Pushing gem to http://127.0.0.1:"+nexus().getPort()+"/nexus/content/repositories/gemshost..."));
 
     assertFileDownload(repoId, "gems/" + gem.getName(), is(true));
     assertFileDownload(repoId, "quick/Marshal.4.8/" + gem.getName() + "spec.rz", is(true));
