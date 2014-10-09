@@ -45,6 +45,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.sonatype.nexus.testsuite.support.ParametersLoaders.firstAvailableTestParameters;
 import static org.sonatype.nexus.testsuite.support.ParametersLoaders.systemTestParameters;
 import static org.sonatype.nexus.testsuite.support.ParametersLoaders.testParameters;
+import static org.sonatype.sisu.filetasks.builder.FileRef.file;
 import static org.sonatype.sisu.goodies.common.Varargs.$;
 
 @NexusStartAndStopStrategy(Strategy.EACH_TEST)
@@ -78,7 +79,7 @@ public abstract class RubyITSupport
 
   // TODO: this might be moved to some subclass. Current Ruby ITs did use almost same config, but it might change in future
   @Before
-  public void before() {
+  public void mayCreateRepositories() {
     try {
       // ask for repo
       repositories().get("gemshost");
@@ -94,7 +95,26 @@ public abstract class RubyITSupport
     }
   }
 
+  @Before
+  public void configureScriptingContainer() {
+    overlays.create()
+        .file(file(new File(getBundleTargetDirectory(), ".gem/nexus")))
+        .containing("---\n" +
+            ":url: http://localhost:" + nexus().getPort() + "/nexus/content/repositories/gemshost\n" +
+            ":authorization: Basic YWRtaW46YWRtaW4xMjM=\n")
+        .run();
+    overlays.create()
+        .file(file(new File(getBundleTargetDirectory(), ".gem/credentials")))
+        .containing("---\n" +
+            ":rubygems_api_key: blablablabla\n" +
+            ":test: Basic YWRtaW46YWRtaW4xMjM=\n").run();
+  }
+
   // ==
+
+  protected File getBundleTargetDirectory() {
+    return nexus().getConfiguration().getTargetDirectory();
+  }
 
   private ScriptingContainer ruby() {
     if (this.ruby == null) {
@@ -104,7 +124,7 @@ public abstract class RubyITSupport
   }
 
   protected ScriptingContainer createScriptingContainer() {
-    return new ITestJRubyScriptingContainer(testData().resolveFile(".gem").getParent());
+    return new ITestJRubyScriptingContainer(getBundleTargetDirectory(), new File(getBundleTargetDirectory(), "rubygems"));
   }
 
   protected GemRunner gemRunner() {
@@ -131,20 +151,17 @@ public abstract class RubyITSupport
   }
 
   protected File assertFileDownload(String repoId, String name, Matcher<Boolean> matcher) {
-    File target = new File(util.createTempDir(), "null");
-
+    File download = new File(util.createTempDir(), "null");
     try {
-      content().download(new Location(repoId, name), target);
+      content().download(new Location(repoId, name), download);
     }
     catch (Exception e) {
       // just ignore it and let matcher test
     }
     // from version 2.4.0-03 onwards count empty files as non-existing
-    assertThat(name, target.exists() && target.length() > 0, matcher);
-
-    target.deleteOnExit();
-
-    return target;
+    assertThat(name, download.exists() && download.length() > 0, matcher);
+    download.deleteOnExit();
+   return download;
   }
 
   protected void assertFileRemoval(String repoId, String name, Matcher<Boolean> matcher) {
@@ -167,8 +184,7 @@ public abstract class RubyITSupport
             artifactResolver().resolvePluginFromDependencyManagement(
                 "org.sonatype.nexus.plugins", "nexus-ruby-plugin"
             )
-        )
-        .setPort(4711); // TODO: remove static port
+        );
   }
 
   protected File installLatestNexusGem() {

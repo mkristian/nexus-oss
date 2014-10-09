@@ -19,6 +19,7 @@ import java.io.IOException;
 import org.sonatype.nexus.bundle.launcher.NexusBundleConfiguration;
 
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -34,8 +35,6 @@ import static org.sonatype.sisu.filetasks.builder.FileRef.path;
 public abstract class BundleITSupport
     extends RubyITSupport
 {
-  private File target;
-
   private String repoId;
 
   public BundleITSupport(final String nexusBundleCoordinates, final String repoId) {
@@ -45,8 +44,20 @@ public abstract class BundleITSupport
 
   @Override
   protected ITestJRubyScriptingContainer createScriptingContainer() {
-    return new ITestJRubyScriptingContainer(testData().resolveFile(".gem").getParent(),
-        new File(target, "project/Gemfile"));
+    return new ITestJRubyScriptingContainer(getBundleTargetDirectory(), new File(getBundleTargetDirectory(), "rubygems"),
+        new File(getBundleTargetDirectory(), "project/Gemfile"));
+  }
+
+  @Before
+  public void configureBundler() {
+    overlays.copy()
+        .directory(file(testData().resolveFile("project")))
+        .to().directory(file(new File(getBundleTargetDirectory(), "project"))).run();
+    overlays.create()
+        .file(file(new File(getBundleTargetDirectory(), "project/bundle/config")))
+        .containing("---\nBUNDLE_MIRROR__HTTP://RUBYGEMS.ORG: " +
+            "http://localhost:"+ nexus().getPort() +"/nexus/content/repositories/" + repoId + "/").run();
+    overlays.rename(file(new File(getBundleTargetDirectory(), "project/bundle"))).to(".bundle").run();
   }
 
   @Test
@@ -128,26 +139,11 @@ public abstract class BundleITSupport
   @Override
   protected NexusBundleConfiguration configureNexus(NexusBundleConfiguration configuration) {
     configuration = super.configureNexus(configuration);
-    target = configuration.getTargetDirectory();
     return configuration
-        .addOverlays(
-            overlays.copy()
-                .directory(file(testData().resolveFile("project")))
-                .to().directory(path("project"))
-        )
         .addOverlays(
             overlays.copy()
                 .directory(file(testData().resolveFile("repo")))
                 .to().directory(path("sonatype-work/nexus/storage/gemshost"))
-        )
-        .addOverlays(
-            overlays.create()
-                .file(path("project/bundle/config"))
-                .containing("---\nBUNDLE_MIRROR__HTTP://RUBYGEMS.ORG: " +
-                    "http://localhost:4711/nexus/content/repositories/" + repoId + "/")
-        )
-        .addOverlays(
-            overlays.rename(path("project/bundle")).to(".bundle"))
-        ;
+        );
   }
 }

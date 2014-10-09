@@ -58,9 +58,11 @@ public abstract class GemLifecycleITSupport
     assertFileDownload(repoId, gemspecName, is(false));
 
     // upload gem to gemshost - repoId is hardcoded into config-file
-    File config = testData().resolveFile(".gem/nexus");
-    assertThat(lastLine(gemRunner().nexus(config, nexusGem)), equalTo("Created"));
-    assertThat(lastLine(gemRunner().nexus(config, nexusGem)), endsWith("not allowed"));
+    File config = new File(getBundleTargetDirectory(), ".gem/nexus");
+    String nx1 = gemRunner().nexus(config, nexusGem);
+    String nx2 = gemRunner().nexus(config, nexusGem);
+    assertThat(nx1, lastLine(nx1), equalTo("Created"));
+    assertThat(nx2, lastLine(nx2), endsWith("not allowed"));
 
     assertFileDownload(repoId, gemName, is(true));
     assertFileDownload(repoId, gemspecName, is(true));

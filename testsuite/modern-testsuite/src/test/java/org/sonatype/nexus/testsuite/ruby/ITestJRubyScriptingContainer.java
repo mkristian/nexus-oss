@@ -17,12 +17,11 @@ import java.io.File;
 class ITestJRubyScriptingContainer
     extends TestScriptingContainer
 {
-  // FIXME: Should root reference to "target" here using TestUtil
-  ITestJRubyScriptingContainer(String userHome) {
-    super(userHome, "target/rubygems", null);
+  ITestJRubyScriptingContainer(File userHome, File rubygems) {
+    super(userHome.getAbsolutePath(), rubygems.getAbsolutePath(), null);
   }
 
-  ITestJRubyScriptingContainer(String userHome, File gemfile) {
-    super(userHome, "target/rubygems", gemfile.getAbsolutePath());
+  ITestJRubyScriptingContainer(File userHome, File rubygems, File gemfile) {
+    super(userHome.getAbsolutePath(), rubygems.getAbsolutePath(), gemfile == null ? null : gemfile.getAbsolutePath());
   }
 }
