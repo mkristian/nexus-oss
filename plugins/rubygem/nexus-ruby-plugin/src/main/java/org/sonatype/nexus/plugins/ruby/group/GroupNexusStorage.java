@@ -144,10 +144,8 @@ public class GroupNexusStorage
       return storeSpecsIndex(file, gateway.mergeSpecs(streams, file.specsType() == SpecsIndexType.LATEST));
     }
     finally {
-      if (streams != null) {
-        for (InputStream i : streams) {
-          IOUtil.close(i);
-        }
+      for (InputStream i : streams) {
+        IOUtil.close(i);
       }
     }
   }

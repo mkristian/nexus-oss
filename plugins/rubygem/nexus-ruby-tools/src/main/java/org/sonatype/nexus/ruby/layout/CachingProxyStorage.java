@@ -136,7 +136,7 @@ public class CachingProxyStorage
         update(file, path);
       }
       else {
-        retrieve((RubygemsFile) file);
+        retrieve(file);
       }
     }
     catch (IOException e) {

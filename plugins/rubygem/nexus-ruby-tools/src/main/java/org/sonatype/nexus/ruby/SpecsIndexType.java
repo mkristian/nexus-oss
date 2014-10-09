@@ -17,7 +17,7 @@ public enum SpecsIndexType
   RELEASE, PRERELEASE, LATEST;
 
   public String filename() {
-    StringBuffer name = new StringBuffer();
+    StringBuilder name = new StringBuilder();
     if (this != RELEASE) {
       name.append(name().toLowerCase().replaceFirst("^release", ""))
           .append("_");
