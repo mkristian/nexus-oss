@@ -30,7 +30,6 @@ import org.sonatype.nexus.proxy.AccessDeniedException;
 import org.sonatype.nexus.proxy.IllegalOperationException;
 import org.sonatype.nexus.proxy.ItemNotFoundException;
 import org.sonatype.nexus.proxy.LocalStorageException;
-import org.sonatype.nexus.proxy.RemoteAccessException;
 import org.sonatype.nexus.proxy.ResourceStoreRequest;
 import org.sonatype.nexus.proxy.StorageException;
 import org.sonatype.nexus.proxy.item.AbstractStorageItem;
@@ -47,6 +46,7 @@ import org.sonatype.nexus.ruby.RepairHelper;
 import org.sonatype.nexus.ruby.RubygemsFile;
 import org.sonatype.nexus.ruby.RubygemsGateway;
 import org.sonatype.nexus.ruby.SpecsIndexType;
+import org.sonatype.nexus.ruby.cuba.api.ApiV1DependenciesCuba;
 import org.sonatype.nexus.ruby.layout.ProxiedRubygemsFileSystem;
 
 import org.codehaus.plexus.util.xml.Xpp3Dom;
@@ -126,7 +126,7 @@ public class DefaultProxyRubyRepository
       }
       return isOld(getMetadataMaxAge(), item);
     }
-    if (item.getName().endsWith(".json.rz")) {
+    if (item.getName().endsWith(ApiV1DependenciesCuba.RUBY)) {
       if (log.isDebugEnabled()) {
         log.debug("{} needs remote update {}", item, isOld(getMetadataMaxAge(), item));
       }
